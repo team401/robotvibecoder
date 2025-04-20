@@ -1,17 +1,17 @@
-import json
 import sys
-from jinja2 import Environment, PackageLoader, select_autoescape
 from sys import argv
 from robotvibecoder_aidnem.config import load_json_config
 from robotvibecoder_aidnem.templating import generate_env
 
 
 def usage(file=sys.stdout):
-    print("Usage: robotvibecoder [config file]")
-    print("\tReads [config file] to generate a mechanism at the path specified")
+    print("Usage: robotvibecoder [config file]", file=file)
+    print(
+        "\tReads [config file] to generate a mechanism at the path specified", file=file
+    )
 
 
-def main():
+def main() -> None:
     if len(argv) != 2:
         print("Error: Expected 2 arguments", file=sys.stderr)
         usage(sys.stderr)
