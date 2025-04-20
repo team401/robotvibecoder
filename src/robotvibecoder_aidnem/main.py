@@ -1,21 +1,36 @@
+import argparse
 import sys
 from sys import argv
 from robotvibecoder_aidnem.config import load_json_config
 from robotvibecoder_aidnem.templating import generate_env
-
-
-def usage(file=sys.stdout):
-    print("Usage: robotvibecoder [config file]", file=file)
-    print(
-        "\tReads [config file] to generate a mechanism at the path specified", file=file
-    )
+from robotvibecoder_aidnem.new import new
 
 
 def main() -> None:
-    if len(argv) != 2:
-        print("Error: Expected 2 arguments", file=sys.stderr)
-        usage(sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        prog="RobotVibeCoder",
+        description="Automatically generates boilerplate FRC mechanisms",
+        epilog="For documentation or to open a ticket, visit https://github.com/aidnem/robotvibecoder",
+    )
+
+    subparsers = parser.add_subparsers(help="subcommand", required=True)
+
+    parser_new = subparsers.add_parser("new", help="generate a new config json file")
+    parser_new.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="interactively fill fields with command-line utility",
+    )
+    parser_new.add_argument(
+        "outfile", type=str, help="path to write the config file to"
+    )
+    parser_new.set_defaults(func=new)
+
+    args = parser.parse_args()
+    args.func(args)
+
+    sys.exit(1)
 
     config_path: str = argv[1]
 
