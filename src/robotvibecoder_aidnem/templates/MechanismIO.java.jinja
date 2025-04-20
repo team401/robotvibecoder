@@ -22,7 +22,7 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ElevatorIO {
   @AutoLog
   public static class {{ name }}Inputs {
-    {% for motor in motors %}
+    {%- for motor in motors %}
     public boolean {{ motor }}Connected = false;
 
     /** Stator current of the {{ motor }} */

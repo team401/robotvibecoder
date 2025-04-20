@@ -22,7 +22,6 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ElevatorIO {
   @AutoLog
   public static class ElevatorInputs {
-    
     public boolean leadMotorConnected = false;
 
     /** Stator current of the leadMotor */
