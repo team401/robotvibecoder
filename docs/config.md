@@ -42,23 +42,21 @@ That will launch a wizard: here's an example usage:
   Press Ctrl+C to cancel or [Enter] to continue
 Interactively generating new config. Please enter each field and press [Enter].
 Package: will come after frc.robot (e.g. `subsystems.scoring`)
-> subsystems.example
+> subsystems.scoring
 Name: should be capitalized and should not end in Mechanism or Subsystem, as this is automatically added
-> ExampleArm
+> Elevator
+CAN Bus: whatever the name of the mechanism's bus is (e.g. `canivore`)
+> canivore
 Number of motors (an integer, >= 1)
-> 4
+> 2
 Motor 1 name: a camelcase motor name (e.g. leadMotor)
-> bottomLeft
+> leadMotor
 Motor 2 name: a camelcase motor name (e.g. leadMotor)
-> bottomRight
-Motor 3 name: a camelcase motor name (e.g. leadMotor)
-> topLeft
-Motor 4 name: a camelcase motor name (e.g. leadMotor)
-> topRight
+> followerMotor
 Lead motor (must be one of previously defined motors)
-> topLeft
+> leadMotor
 Encoder name: a camelcase encoder name (e.g. armEncoder)
-> exampleArmEncoder
+> elevatorEncoder
 [RobotVibeCoder] Writing config file at `output.json`
 ```
 
@@ -87,6 +85,10 @@ This process would produce the following JSON config:
 - ### `name`
 
   The name field is a string determining the name of the mechanism. This should be capitalized, and should not end with "mechanism" or "subsystem". For instance, the name string `Elevator` would generate IOs named `ElevatorIO.java`, `ElevatorIOTalonFX.java`, etc.
+
+- ### `canbus`
+
+  The canbus field is a string field determining the name of the CAN bus that the devices will be on. For example, the default CAN bus when using a canivore is `canivore`
 
 - ### `motors`
 
