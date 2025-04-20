@@ -8,6 +8,7 @@ from robotvibecoder_aidnem.config import (
     validate_config,
 )
 from robotvibecoder_aidnem.templating import generate_env
+import os
 
 
 def generate(args: Namespace) -> None:
@@ -23,6 +24,7 @@ def generate(args: Namespace) -> None:
             print(
                 "Error: Config not specified: Either --stdin or --config [file] must be supplied to command."
             )
+            sys.exit(1)
         print(f"[RobotVibeCoder] Reading config file at {args.config}")
         config = load_json_config(args.config)
 
@@ -38,19 +40,26 @@ def generate(args: Namespace) -> None:
         "{name}Constants.java",
     ]
 
-    print("WARNING: This will create/overwrite files at the following paths:")
-    for file_template in file_templates:
-        output_path = file_template.format(name = config.name)
-        print(f"  {output_path}")
-    try:
-        input("\n  Press Ctrl+C to cancel or [Enter] to continue")
-    except KeyboardInterrupt:
-        print("\nCancelled.")
-        sys.exit(0)
+    if not args.stdin:
+        print("WARNING: This will create/overwrite files at the following paths:")
+        for file_template in file_templates:
+            output_path = file_template.format(name = config.name)
+            print(f"  {output_path}")
+        try:
+            input("\n  Press Ctrl+C to cancel or [Enter] to continue")
+        except KeyboardInterrupt:
+            print("\nCancelled.")
+            sys.exit(0)
 
     for file_template in file_templates:
-        print(f"Templating {output_path}")
         output_path = file_template.format(name = config.name)
+
+        if os.path.exists(output_path) and args.stdin:
+            # stdin mode skips the warning prompt at the start, so files would be destroyed, necessitating this check
+            print(f"Error: File {output_path} already exists. Please move/delete it and retry")
+            sys.exit(1)
+
+        print(f"Templating {output_path}")
         template_path = file_template.format(name = "Mechanism") + ".j2" # E.g. MechanismIO.java.j2
         template = env.get_template(template_path)
 
