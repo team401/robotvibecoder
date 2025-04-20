@@ -21,6 +21,9 @@ def new_config_interactive() -> MechanismConfig:
     )
     name: str = input("> ")
 
+    print("CAN Bus: whatever the name of the mechanism's bus is (e.g. `canivore`)")
+    canbus: str = input("> ")
+
     num_motors: int = -1
     while num_motors == -1:
         try:
@@ -49,7 +52,7 @@ def new_config_interactive() -> MechanismConfig:
 
     encoder: str = input("Encoder name: a camelcase encoder name (e.g. armEncoder)\n> ")
 
-    return MechanismConfig(package, name, motors, lead_motor, encoder)
+    return MechanismConfig(package, name, canbus, motors, lead_motor, encoder)
 
 
 def new(args: Namespace) -> None:

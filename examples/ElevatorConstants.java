@@ -1,4 +1,4 @@
-package frc.robot.{{ package }}; // NOTE: This should be changed if you keep your constants in a separate package from your code
+package frc.robot.subsystems.scoring; // NOTE: This should be changed if you keep your constants in a separate package from your code
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
@@ -34,56 +34,57 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Filesystem;
 
-public final class {{ name }}Constants {
+public final class ElevatorConstants {
   @JSONExclude
-  public static final JSONSync<{{ name }}Constants> synced =
-      new JSONSync<{{ name }}Constants>(
-          new {{ name }}Constants(),
-          "{{ name }}Constants.json",
+  public static final JSONSync<ElevatorConstants> synced =
+      new JSONSync<ElevatorConstants>(
+          new ElevatorConstants(),
+          "ElevatorConstants.json",
           EnvironmentHandler.getEnvironmentHandler().getEnvironmentPathProvider(),
           new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
-
-  {%- for motor in motors %}
-  public final Integer {{ motor }}Id = {{ motor|hash_can_id }}; // TODO: Replace placeholder CAN ID
-  {% endfor %}
+  public final Integer leadMotorId = 1; // TODO: Replace placeholder CAN ID
+  
+  public final Integer followerMotorId = 2; // TODO: Replace placeholder CAN ID
+  
   public final Boolean invertFollowerElevatorMotor = true;
-    {%- for motor in motors%}
-    {% if motor != lead_motor%}
-  public final Boolean invert{{ motor|capitalize }}FollowerRequest = false;
-    {% endif %}
-    {% endfor %}
+    
+    
+    
+  public final Boolean invertFollowermotorFollowerRequest = false;
+    
+    
 
   /**
    * What point in the sensor's range the discontinuity occurs. Results in a range of [1-x, x). For
    * example, a value of 1 gives a range of [0.0, 1).
    */
-  public final Double {{ encoder }}DiscontinuityPoint = 1.0;
+  public final Double elevatorEncoderDiscontinuityPoint = 1.0;
 
-  public final Integer {{ encoder }}ID = {{ encoder|hash_can_id }}; // TODO: Replace placeholder CAN ID
+  public final Integer elevatorEncoderID = 3; // TODO: Replace placeholder CAN ID
 
-  public final SensorDirectionValue {{ encoder }}Direction =
+  public final SensorDirectionValue elevatorEncoderDirection =
       SensorDirectionValue.Clockwise_Positive;
 
   /*
-   * The {{ encoder }} is represented as the mechanism in our Phoenix configs.
+   * The elevatorEncoder is represented as the mechanism in our Phoenix configs.
    * This means that we are controlling to a goal in terms of large CANCoder angle.
    */
-  @JSONExclude public final double {{ encoder }}ToMechanismRatio = 1.0;
+  @JSONExclude public final double elevatorEncoderToMechanismRatio = 1.0;
 
   @JSONExclude
-  public final double rotorTo{{ encoder }} Ratio = 1.0; // TODO: Replace placeholder value
+  public final double rotorToelevatorEncoder Ratio = 1.0; // TODO: Replace placeholder value
 
-  public final Double {{ name|lowerfirst }}kP = 0.0;
-  public final Double {{ name|lowerfirst }}kI = 0.0;
-  public final Double {{ name|lowerfirst }}kD = 0.0;
+  public final Double elevatorkP = 0.0;
+  public final Double elevatorkI = 0.0;
+  public final Double elevatorkD = 0.0;
 
-  public final Double {{ name|lowerfirst }}kS = 0.0;
-  public final Double {{ name|lowerfirst }}kV = 0.0;
-  public final Double {{ name|lowerfirst }}kA = 0.0;
-  public final Double {{ name|lowerfirst }}kG = 0.0;
+  public final Double elevatorkS = 0.0;
+  public final Double elevatorkV = 0.0;
+  public final Double elevatorkA = 0.0;
+  public final Double elevatorkG = 0.0;
 
   /** This is a Double until coppercore JSONSync supports RotationsPerSecond */
-  public final Double {{ name|lowerfirst }}AngularCruiseVelocityRotationsPerSecond = 1.0;
+  public final Double elevatorAngularCruiseVelocityRotationsPerSecond = 1.0;
 
   /*
    * The Motion Magic Expo kV, measured in Volts per Radian per Second, but represented as a double so it can be synced by JSONSync
@@ -92,23 +93,23 @@ public final class {{ name }}Constants {
    * kV results in the maximum velocity of the system. Therefore, a higher profile kV results in a
    * lower profile velocity.
   */
-  public final Double {{ name|lowerfirst }}Expo_kV_raw = 0.0;
+  public final Double elevatorExpo_kV_raw = 0.0;
 
   /*
    * The Motion Magic Expo kA, measured in Volts per Radian per Second Squared, but represented as a double so it can be synced by JSONSync
   */
   public final Double elevatorExpo_kA_raw = 0.0;
 
-  public final Current {{ name|lowerfirst }}StatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
+  public final Current elevatorStatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
 
   public static final class Sim {
     @JSONExclude
-    public static final JSONSync<{{ name }}Constants.Sim> synced =
-        new JSONSync<{{ name }}Constants.Sim>(
-            new {{ name }}Constants.Sim(),
+    public static final JSONSync<ElevatorConstants.Sim> synced =
+        new JSONSync<ElevatorConstants.Sim>(
+            new ElevatorConstants.Sim(),
             Filesystem.getDeployDirectory()
                 .toPath()
-                .resolve("constants/{{ name }}Constants.Sim.json")
+                .resolve("constants/ElevatorConstants.Sim.json")
                 .toString(),
             new JSONSyncConfigBuilder().build());
 

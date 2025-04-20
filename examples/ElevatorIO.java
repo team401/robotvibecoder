@@ -20,6 +20,12 @@ import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ElevatorIO {
+  enum ElevatorOutputMode {
+    ClosedLoop, // Not overriding, it should be closed loop
+    Current, // Overriding, manually applying a current
+    Voltage // Overriding, manually applying a voltage
+  }
+
   @AutoLog
   public static class ElevatorInputs {
     public boolean leadMotorConnected = false;
@@ -58,14 +64,17 @@ public interface ElevatorIO {
      */
     public double motionMagicError = 0.0;
 
-    /** Velocity of the name, as reported by the leadMotor TalonFX */
-    public MutAngularVelocity elevatornameVelocity = RotationsPerSecond.mutable(0.0);
+    /** Velocity of the Elevator mechanism, as reported by the leadMotor TalonFX */
+    public MutAngularVelocity elevatorVelocity = RotationsPerSecond.mutable(0.0);
   }
 
   @AutoLog
   public static class ElevatorOutputs {
     /** Are the motors currently disabled in software? */
     public boolean motorsDisabled = false;
+
+    /** The current output mode of the elevator */
+    public ElevatorOutputMode outputMode = ElevatorOutputMode.ClosedLoop;
 
     /** The voltage currently applied to the motors */
     public MutVoltage elevatorAppliedVolts = Volts.mutable(0.0);

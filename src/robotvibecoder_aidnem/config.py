@@ -7,6 +7,7 @@ import sys
 class MechanismConfig:
     package: str
     name: str
+    canbus: str
     motors: list[str]
     lead_motor: str
     encoder: str

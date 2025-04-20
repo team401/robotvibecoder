@@ -1,0 +1,315 @@
+package frc.robot.{{ package }};
+
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Volts;
+
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.VoltageUnit;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.Per;
+import edu.wpi.first.units.measure.Voltage;
+import frc.robot.constants.subsystems.ElevatorConstants;
+import org.littletonrobotics.junction.Logger;
+
+public class {{ name }}IOTalonFX implements {{ name }}IO {
+  MutAngle {{ encoder }}GoalAngle = Rotations.mutable(0.0);
+  MutAngle {{ encoder }}SetpointPosition = Rotations.mutable(0.0);
+
+  Current overrideCurrent;
+  Voltage overrideVoltage;
+
+  {{ name }}OutputMode outputMode = {{ name }}OutputMode.ClosedLoop;
+
+  {%- for motor in motors %}
+  private TalonFX {{ motor }};
+  {% endfor %}
+
+  CANcoder {{ encoder }};
+
+  // Reuse the same talonFXConfiguration instead of making a new one each time.
+  TalonFXConfiguration talonFXConfigs;
+
+  boolean motorDisabled = false;
+
+  private StatusSignal<Angle> {{ encoder }}Position;
+  private StatusSignal<Angle> {{ encoder }}Velocity;
+  {%- for motor in motors %}
+  private StatusSignal<Current> {{ motor }}SupplyCurrent;
+  private StatusSignal<Current> {{ motor }}StatorCurrent;
+
+  {% endfor %}
+
+  // Reuse the same motion magic request to avoid garbage collector having to clean them up.
+  MotionMagicExpoTorqueCurrentFOC motionMagicExpoTorqueCurrentFOC =
+      new MotionMagicExpoTorqueCurrentFOC(0.0);
+  VoltageOut voltageOut = new VoltageOut(0.0);
+  TorqueCurrentFOC currentOut = new TorqueCurrentFOC(0.0);
+
+  public ElevatorIOTalonFX() {
+    // Initialize TalonFXs  and CANcoders with their correct IDs
+    {%- for motor in motors %}
+    {{ motor }} = new TalonFX({{ name }}Constants.synced.getObject().{{ motor }}Id, "{{ canbus }}")
+    {% endfor %}
+
+    {{ encoder }} =
+        new CANcoder({{ name }}Constants.synced.getObject().{{ encoder }}ID, "{{ canbus }}");
+
+    CANcoderConfiguration cancoderConfiguration = new CANcoderConfiguration();
+    cancoderConfiguration.MagnetSensor.AbsoluteSensorDiscontinuityPoint =
+        {{ name }}Constants.synced.getObject().{{ encoder }}DiscontinuityPoint;
+
+    // Update with large CANcoder direction and apply
+    cancoderConfiguration.MagnetSensor.SensorDirection =
+        {{ name }}Constants.synced.getObject().{{ encoder }}Direction;
+    cancoderConfiguration.MagnetSensor.MagnetOffset = {{ name }}Constants.synced.getObject().{{ encoder }}MagnetOffset;
+    {{ encoder }}.getConfigurator().apply(cancoderConfiguration);
+
+    // Cache status signals and refresh them when used
+    {{ encoder }}Position = {{ encoder }}.getPosition();
+{% for motor in motors %}
+    {{ motor }}SupplyCurrent = {{ motor }}.getSupplyCurrent();
+    {{ motor }}StatorCurrent = {{ motor }}.getStatorCurrent();
+{% endfor %}
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0,
+        {%- for motor in motors%}
+        {{ motor }}SupplyCurrent,
+        {{ motor }}StatorCurrent,
+        {%- endfor %}
+        {{ encoder }}Position
+    );
+
+    // Initialize talonFXConfigs to use FusedCANCoder and Motion Magic Expo and have correct PID
+    // gains and current limits.
+    talonFXConfigs =
+        new TalonFXConfiguration()
+            .withFeedback(
+                new FeedbackConfigs()
+                    .withFeedbackRemoteSensorID({{ encoder }}.getDeviceID())
+                    .withFeedbackSensorSource(FeedbackSensorSourceValue.FusedCANcoder)
+                    .withSensorToMechanismRatio(
+                        {{ name }}Constants.synced.getObject().{{ encoder }}ToMechanismRatio)
+                    .withRotorToSensorRatio(
+                        {{ name }}Constants.synced.getObject().rotorTo{{ encoder }}Ratio))
+            .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimitEnable(true)
+                    .withStatorCurrentLimit(
+                        {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}StatorCurrentLimit))
+            .withSlot0(
+                new Slot0Configs()
+                    .withGravityType(GravityTypeValue.Elevator_Static)
+                    .withKS({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kS)
+                    .withKV({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kV)
+                    .withKA({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kA)
+                    .withKG({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kG)
+                    .withKP({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kP)
+                    .withKI({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kI)
+                    .withKD({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kD))
+            .withMotionMagic(
+                new MotionMagicConfigs()
+                    .withMotionMagicCruiseVelocity(
+                        {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}AngularCruiseVelocityRotationsPerSecond)
+                    .withMotionMagicExpo_kA(
+                        {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Expo_kA_raw)
+                    .withMotionMagicExpo_kV(
+                        {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Expo_kV_raw));
+
+    // Apply talonFX config to motor{{ motors|plural }}
+    {%- for motor in motors %}
+    {{ motor }}.getConfigurator().apply(talonFXConfigs);
+    {%- endfor %}
+
+    // Make follower motor{{ motors|plural }} permanently follow lead motor.
+    {%- for motor in motors%}
+        {%- if motor != lead_motor%}
+    {{ motor }}.setControl(
+        new Follower(
+            {{ lead_motor }}.getDeviceID(),
+            {{ name }}Constants.synced.getObject().invert{{ motor|capitalize }}FollowerRequest));
+        {%- endif %}
+    {%- endfor %}
+  }
+
+  @Override
+  public void updateInputs({{ name }}Inputs inputs) {
+    StatusCode refreshStatus = BaseStatusSignal.refreshAll({{ encoder }}Position, {{ encoder }}Velocity);
+
+    inputs.{{ encoder }}Pos.mut_replace({{ encoder }}Position.getValue());
+    inputs.{{ encoder }}Vel.mut_replace({{ encoder }}Velocity.getValue());
+    inputs.{{ encoder }}Connected = refreshStatus.isOK();
+
+    refreshStatus = BaseStatusSignal.refreshAll(
+        {%- for motor in motors %}
+        {{ motor }}SupplyCurrent,
+        {{ motor }}StatorCurrent{{ "," if not loop.last }}
+        {%- endfor %}
+    );
+{% for motor in motors %}
+    inputs.{{ motor }}SupplyCurrent.mut_replace({{ motor }}SupplyCurrent.getValue());
+    inputs.{{ motor }}StatorCurrent.mut_replace({{ motor }}StatorCurrent.getValue());
+{% endfor %}
+    inputs.{{ encoder }}GoalPos.mut_replace({{ encoder }}GoalAngle);
+    inputs.{{ encoder }}SetpointPos.mut_replace({{ encoder }}SetpointPosition);
+
+    inputs.motionMagicError = {{ lead_motor }}.getClosedLoopError().getValueAsDouble();
+
+    inputs.{{ name|lowerfirst }}MechanismVelocity.mut_replace({{ encoder }}.getVelocity().getValue());
+  }
+
+  @Override
+  public void applyOutputs({{ name }}Outputs outputs) {
+    outputs.motorsDisabled = motorDisabled;
+    outputs.outputMode = outputMode;
+
+    motionMagicExpoTorqueCurrentFOC.withPosition({{ encoder }}GoalAngle);
+
+    if (motorDisabled) {
+      {{ lead_motor }}.setControl(voltageOut.withOutput(0.0));
+      outputs.{{ name|lowerfirst }}AppliedVolts.mut_replace(Volts.of(0.0));
+    } else {
+      switch (outputMode) {
+        case ClosedLoop:
+          {{ lead_motor }}.setControl(motionMagicExpoTorqueCurrentFOC);
+
+          {{ encoder }}SetpointPosition.mut_setMagnitude(
+              ({{ lead_motor }}.getClosedLoopReference().getValue()));
+
+          Logger.recordOutput(
+              "{{ name|lowerfirst }}/referenceSlope",
+              leadMotor.getClosedLoopReferenceSlope().getValueAsDouble());
+          outputs.{{ name|lowerfirst }}AppliedVolts.mut_replace(
+              Volts.of({{ lead_motor }}.getClosedLoopOutput().getValueAsDouble()));
+          outputs.pContrib.mut_replace(
+              Volts.of({{ lead_motor }}.getClosedLoopProportionalOutput().getValueAsDouble()));
+          outputs.iContrib.mut_replace(
+              Volts.of({{ lead_motor }}.getClosedLoopIntegratedOutput().getValueAsDouble()));
+          outputs.dContrib.mut_replace(
+              Volts.of({{ lead_motor }}.getClosedLoopDerivativeOutput().getValueAsDouble()));
+          break;
+        case Voltage:
+          {{ lead_motor }}.setControl(new VoltageOut(overrideVoltage));
+          outputs.{{ name|lowerfirst }}AppliedVolts.mut_replace(overrideVoltage);
+          break;
+        case Current:
+          {{ lead_motor }}.setControl(currentOut.withOutput(overrideCurrent));
+          outputs.{{ name|lowerfirst }}AppliedVolts.mut_replace({{ lead_motor }}.getMotorVoltage().getValue());
+          break;
+      }
+    }
+  }
+
+  @Override
+  public void {{ encoder }}GoalPos(Angle goalPos) {
+    {{ encoder }}GoalAngle.mut_replace(goalPos);
+  }
+
+  @Override
+  public void set{{ encoder }}Position(Angle newAngle) {
+    {{ encoder }}.setPosition(newAngle);
+  }
+
+  @Override
+  public void setOutputMode({{ name }}OutputMode outputMode) {
+    this.outputMode = outputMode;
+  }
+
+  @Override
+  public void setOverrideVoltage(Voltage volts) {
+    overrideVoltage = volts;
+  }
+
+  @Override
+  public void setOverrideCurrent(Current current) {
+    overrideCurrent = current;
+  }
+
+  @Override
+  public void setPID(double p, double i, double d) {
+    Slot0Configs configs = talonFXConfigs.Slot0;
+
+    configs.kP = p;
+    configs.kI = i;
+    configs.kD = d;
+
+    {%- for motor in motors %}
+    {{ motor }}.getConfigurator().apply(configs);
+    {%- endfor %}
+  }
+
+  @Override
+  public void setMaxProfile(
+      AngularVelocity maxVelocity,
+      Per<VoltageUnit, AngularAccelerationUnit> expo_kA,
+      Per<VoltageUnit, AngularVelocityUnit> expo_kV) {
+    MotionMagicConfigs configs =
+        talonFXConfigs
+            .MotionMagic
+            // .withMotionMagicCruiseVelocity(maxVelocity)
+            .withMotionMagicExpo_kA(expo_kA)
+            .withMotionMagicExpo_kV(expo_kV);
+
+    {%- for motor in motors %}
+    {{ motor }}.getConfigurator().apply(configs);
+    {%- endfor %}
+  }
+
+  @Override
+  public void setFF(double kS, double kV, double kA, double kG) {
+    Slot0Configs configs = talonFXConfigs.Slot0;
+
+    configs.kS = kS;
+    configs.kV = kV;
+    configs.kA = kA;
+    configs.kG = kG;
+
+    {%- for motor in motors %}
+    {{ motor }}.getConfigurator().apply(configs);
+    {%- endfor %}
+  }
+
+  @Override
+  public void setBrakeMode(boolean brakeMode) {
+    {%- for motor in motors %}
+    {{ motor }}.setNeutralMode(brakeMode ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    {%- endfor %}
+  }
+
+  @Override
+  public void setStatorCurrentLimit(Current currentLimit) {
+    talonFXConfigs.CurrentLimits.withStatorCurrentLimit(currentLimit);
+
+    // Only apply current limit configs to avoid overwriting PID and FF values from tuning
+    {%- for motor in motors %}
+    {{ motor }}.getConfigurator().apply(talonFXConfigs.CurrentLimits);
+    {%- endfor %}
+  }
+
+  @Override
+  public void setMotorsDisabled(boolean disabled) {
+    motorDisabled = disabled;
+  }
+}

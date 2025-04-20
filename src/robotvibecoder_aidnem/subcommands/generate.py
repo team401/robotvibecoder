@@ -31,17 +31,33 @@ def generate(args: Namespace) -> None:
     validate_config(config)
 
     env = generate_env()
-    template = env.get_template("MechanismIO.java.j2")
 
-    output: str = template.render(config.__dict__)
+    file_templates = [
+        "{name}IO.java",
+        "{name}IOTalonFX.java",
+        "{name}Constants.java",
+    ]
 
-    print("Templated output; writing file")
+    print("WARNING: This will create/overwrite files at the following paths:")
+    for file_template in file_templates:
+        output_path = file_template.format(name = config.name)
+        print(f"  {output_path}")
+    try:
+        input("\n  Press Ctrl+C to cancel or [Enter] to continue")
+    except KeyboardInterrupt:
+        print("\nCancelled.")
+        sys.exit(0)
 
-    outpath = f"{config.name}IO.java"
+    for file_template in file_templates:
+        print(f"Templating {output_path}")
+        output_path = file_template.format(name = config.name)
+        template_path = file_template.format(name = "Mechanism") + ".j2" # E.g. MechanismIO.java.j2
+        template = env.get_template(template_path)
 
-    print(f"Writing IO to {outpath}")
-
-    with open(f"{config.name}IO.java", "w+") as outfile:
-        outfile.write(output)
+        output: str = template.render(config.__dict__)
+        print("Writing output... ", end="")
+        with open(output_path, "w+") as outfile:
+            outfile.write(output)
+        print("Done")
 
     print("Done.")
