@@ -1,0 +1,10 @@
+{
+    "package": "subsystems.scoring",
+    "name": "Elevator",
+    "motors": [
+        "leadMotor",
+        "followerMotor"
+    ],
+    "lead_motor": "leadMotor",
+    "encoder": "elevatorEncoder"
+}
