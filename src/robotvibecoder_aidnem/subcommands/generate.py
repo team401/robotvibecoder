@@ -5,12 +5,13 @@ from robotvibecoder_aidnem.config import (
     MechanismConfig,
     generate_config_from_data,
     load_json_config,
+    validate_config,
 )
 from robotvibecoder_aidnem.templating import generate_env
 
 
 def generate(args: Namespace) -> None:
-    print(f"[RobotVibeCoder] Generating a Mechanism")
+    print("[RobotVibeCoder] Generating a Mechanism")
 
     if args.stdin:
         print("Reading config from stdin.")
@@ -27,8 +28,10 @@ def generate(args: Namespace) -> None:
 
         print("Successfully loaded config")
 
+    validate_config(config)
+
     env = generate_env()
-    template = env.get_template("MechanismIO.java.jinja")
+    template = env.get_template("MechanismIO.java.j2")
 
     output: str = template.render(config.__dict__)
 

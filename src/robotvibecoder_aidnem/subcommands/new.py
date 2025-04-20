@@ -53,7 +53,7 @@ def new_config_interactive() -> MechanismConfig:
 
 
 def new(args: Namespace) -> None:
-    print(f"[RobotVibeCoder] Creating a new config file")
+    print("[RobotVibeCoder] Creating a new config file")
     print(f"  This will create/overwrite a file at `{args.outfile}`")
     try:
         input("  Press Ctrl+C to cancel or [Enter] to continue")

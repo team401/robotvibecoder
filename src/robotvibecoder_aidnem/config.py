@@ -43,3 +43,14 @@ def load_json_config(config_path: str) -> MechanismConfig:
         sys.exit(1)
 
     return generate_config_from_data(data)
+
+
+def validate_config(config: MechanismConfig) -> None:
+    """
+    Validate a config and print any errors if they are found
+    """
+
+    if config.lead_motor not in config.motors:
+        print(f"Error in config `{config.name}`: `lead_motor` must be one of the motors specified by `motors`")
+        print(f"  Found `{config.lead_motor}` but expected one of {', '.join(['`' + motor + '`' for motor in config.motors])}")
+        sys.exit(1)
