@@ -12,17 +12,7 @@ class MechanismConfig:
     encoder: str
 
 
-def load_json_config(config_path: str) -> MechanismConfig:
-    try:
-        with open(config_path, "r") as config_file:
-            data = json.load(config_file)
-    except FileNotFoundError:
-        print(f"Error: Specified config file {config_path} does not exist.")
-        sys.exit(1)
-    except json.JSONDecodeError:
-        print(f"Error: Invalid JSON format in {config_path}")
-        sys.exit(1)
-
+def generate_config_from_data(data: dict) -> MechanismConfig:
     for key in data:
         if key not in [field.name for field in fields(MechanismConfig)]:
             print(f"Error: Config contained unexpected field `{key}`", file=sys.stdout)
@@ -39,3 +29,17 @@ def load_json_config(config_path: str) -> MechanismConfig:
     config: MechanismConfig = MechanismConfig(**data)
 
     return config
+
+
+def load_json_config(config_path: str) -> MechanismConfig:
+    try:
+        with open(config_path, "r") as config_file:
+            data = json.load(config_file)
+    except FileNotFoundError:
+        print(f"Error: Specified config file {config_path} does not exist.")
+        sys.exit(1)
+    except json.JSONDecodeError:
+        print(f"Error: Invalid JSON format in {config_path}")
+        sys.exit(1)
+
+    return generate_config_from_data(data)

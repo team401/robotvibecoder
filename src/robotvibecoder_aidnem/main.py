@@ -3,7 +3,8 @@ import sys
 from sys import argv
 from robotvibecoder_aidnem.config import load_json_config
 from robotvibecoder_aidnem.templating import generate_env
-from robotvibecoder_aidnem.new import new
+from robotvibecoder_aidnem.subcommands.new import new
+from robotvibecoder_aidnem.subcommands.generate import generate
 
 
 def main() -> None:
@@ -27,29 +28,23 @@ def main() -> None:
     )
     parser_new.set_defaults(func=new)
 
+    parser_generate = subparsers.add_parser(
+        "generate", help="generate a mechanism based on a config"
+    )
+    parser_generate.add_argument(
+        "--stdin",
+        action="store_true",
+        help="accept config file from stdin instead of by a path",
+    )
+    parser_generate.add_argument(
+        "-c", "--config", type=str, help="path to the config JSON file"
+    )
+    parser_generate.set_defaults(func=generate)
+
+    # Parse argv
     args = parser.parse_args()
+    # Call the default function defined by the subcommand
     args.func(args)
-
-    sys.exit(1)
-
-    config_path: str = argv[1]
-
-    print(f"[RobotVibeCoder] Reading config file at {config_path}")
-    config = load_json_config(config_path)
-
-    print("Successfully loaded config")
-
-    env = generate_env()
-    template = env.get_template("MechanismIO.java.jinja")
-
-    output: str = template.render(config.__dict__)
-
-    print("Templated output; writing file")
-
-    with open(f"{config.name}IO.java", "w+") as outfile:
-        outfile.write(output)
-
-    print("Done.")
 
 
 if __name__ == "__main__":

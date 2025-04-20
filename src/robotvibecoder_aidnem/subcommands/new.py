@@ -61,7 +61,7 @@ def new(args: Namespace) -> None:
         print("\nCancelled.")
         sys.exit(0)
 
-    config: MechanismConfig = None
+    config: MechanismConfig
     if args.interactive:
         config = new_config_interactive()
     else:
