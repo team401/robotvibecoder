@@ -13,6 +13,13 @@ def main() -> None:
         description="Automatically generates boilerplate FRC mechanisms",
         epilog="For documentation or to open a ticket, visit https://github.com/aidnem/robotvibecoder",
     )
+    parser.add_argument(
+        "-f",
+        "--folder",
+        type=str,
+        help="path to folder to generate/read config or generate IO files into",
+        default="",
+    )
 
     subparsers = parser.add_subparsers(help="subcommand", required=True)
 

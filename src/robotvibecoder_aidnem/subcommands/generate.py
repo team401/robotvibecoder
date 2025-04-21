@@ -19,15 +19,16 @@ def generate(args: Namespace) -> None:
         print("Reading config from stdin.")
         data = json.load(sys.stdin)
 
-        config = generate_config_from_data(data)
+        config: MechanismConfig = generate_config_from_data(data)
     else:
         if args.config is None:
             print(
                 "Error: Config not specified: Either --stdin or --config [file] must be supplied to command."
             )
             sys.exit(1)
-        print(f"[RobotVibeCoder] Reading config file at {args.config}")
-        config = load_json_config(args.config)
+        config_path = os.path.join(args.folder, args.config)
+        print(f"[RobotVibeCoder] Reading config file at {config_path}")
+        config: MechanismConfig = load_json_config(config_path)
 
         print("Successfully loaded config")
 
@@ -44,13 +45,15 @@ def generate(args: Namespace) -> None:
         "{name}IO.java.j2": "{name}IO.java",
         "{name}IOTalonFX.java.j2": "{name}IOTalonFX.java",
         "{name}Constants.java.j2": "{name}Constants.java",
-        config.kind + "{name}Sim.java.j2": "{name}IOSim.java",
+        config.kind + "Sim.java.j2": "{name}IOSim.java",
     }
 
     if not args.stdin:
         print("WARNING: This will create/overwrite files at the following paths:")
         for file_template in file_templates:
-            output_path = file_templates[file_template].format(name=config.name)
+            output_path = os.path.join(
+                args.folder, file_templates[file_template].format(name=config.name)
+            )
             print(f"  {output_path}")
         try:
             input("\n  Press Ctrl+C to cancel or [Enter] to continue")
@@ -59,7 +62,9 @@ def generate(args: Namespace) -> None:
             sys.exit(0)
 
     for file_template in file_templates:
-        output_path = file_templates[file_template].format(name=config.name)
+        output_path = os.path.join(
+            args.folder, file_templates[file_template].format(name=config.name)
+        )
 
         if os.path.exists(output_path) and args.stdin:
             # stdin mode skips the warning prompt at the start, so files would be destroyed, necessitating this check

@@ -3,9 +3,7 @@
   "name": "Wrist",
   "kind": "Arm",
   "canbus": "canivore",
-  "motors": [
-    "wristMotor"
-  ],
+  "motors": ["wristMotor"],
   "lead_motor": "wristMotor",
   "encoder": "wristEncoder"
 }
