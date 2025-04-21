@@ -31,7 +31,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.subsystems.scoring.ElevatorConstants;
+import frc.robot.subsystems.scoring.WristConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class WristIOTalonFX implements WristIO {
@@ -65,7 +65,7 @@ public class WristIOTalonFX implements WristIO {
   VoltageOut voltageOut = new VoltageOut(0.0);
   TorqueCurrentFOC currentOut = new TorqueCurrentFOC(0.0);
 
-  public ElevatorIOTalonFX() {
+  public WristIOTalonFX() {
     // Initialize TalonFXs  and CANcoders with their correct IDs
     wristMotor = new TalonFX(WristConstants.synced.getObject().wristMotorId, "canivore")
 
@@ -114,7 +114,7 @@ public class WristIOTalonFX implements WristIO {
                         WristConstants.synced.getObject().wristStatorCurrentLimit))
             .withSlot0(
                 new Slot0Configs()
-                    .withGravityType(GravityTypeValue.Elevator_Static)
+                    .withGravityType(GravityTypeValue.Arm_Cosine)
                     .withKS(WristConstants.synced.getObject().wristkS)
                     .withKV(WristConstants.synced.getObject().wristkV)
                     .withKA(WristConstants.synced.getObject().wristkA)

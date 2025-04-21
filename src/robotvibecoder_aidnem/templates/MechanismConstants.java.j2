@@ -45,7 +45,7 @@ public final class {{ name }}Constants {
 {% for motor in motors %}
   public final Integer {{ motor }}Id = {{ motor|hash_can_id }}; // TODO: Replace placeholder CAN ID
   {%- endfor %}
-  public final Boolean invertFollowerElevatorMotor = true;
+
     {%- for motor in motors%}
     {%- if motor != lead_motor%}
   public final Boolean invert{{ motor|upperfirst }}FollowerRequest = false;
@@ -96,7 +96,7 @@ public final class {{ name }}Constants {
   /*
    * The Motion Magic Expo kA, measured in Volts per Radian per Second Squared, but represented as a double so it can be synced by JSONSync
   */
-  public final Double elevatorExpo_kA_raw = 0.0;
+  public final Double {{ name|lowerfirst }}Expo_kA_raw = 0.0;
 
   public final Current {{ name|lowerfirst }}StatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
 

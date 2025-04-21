@@ -31,7 +31,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.{{ package }}.ElevatorConstants;
+import frc.robot.{{ package }}.{{ name }}Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class {{ name }}IOTalonFX implements {{ name }}IO {
@@ -68,7 +68,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
   VoltageOut voltageOut = new VoltageOut(0.0);
   TorqueCurrentFOC currentOut = new TorqueCurrentFOC(0.0);
 
-  public ElevatorIOTalonFX() {
+  public {{ name }}IOTalonFX() {
     // Initialize TalonFXs  and CANcoders with their correct IDs
     {%- for motor in motors %}
     {{ motor }} = new TalonFX({{ name }}Constants.synced.getObject().{{ motor }}Id, "{{ canbus }}")
@@ -121,7 +121,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
                         {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}StatorCurrentLimit))
             .withSlot0(
                 new Slot0Configs()
-                    .withGravityType(GravityTypeValue.Elevator_Static)
+                    .withGravityType(GravityTypeValue.{% if kind == "Arm" %}Arm_Cosine{% else %}Elevator_Static{% endif %})
                     .withKS({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kS)
                     .withKV({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kV)
                     .withKA({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kA)

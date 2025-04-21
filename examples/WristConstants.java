@@ -44,7 +44,6 @@ public final class WristConstants {
           new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
 
   public final Integer wristMotorId = 1; // TODO: Replace placeholder CAN ID
-  public final Boolean invertFollowerElevatorMotor = true;
 
   /**
    * What point in the sensor's range the discontinuity occurs. Results in a range of [1-x, x). For
@@ -90,7 +89,7 @@ public final class WristConstants {
   /*
    * The Motion Magic Expo kA, measured in Volts per Radian per Second Squared, but represented as a double so it can be synced by JSONSync
   */
-  public final Double elevatorExpo_kA_raw = 0.0;
+  public final Double wristExpo_kA_raw = 0.0;
 
   public final Current wristStatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
 

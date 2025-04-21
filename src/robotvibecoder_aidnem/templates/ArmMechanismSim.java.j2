@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 {%- block sim_declaration %}
   private final SingleJointedArmSim {{ name|lowerfirst }}Sim =
       new SingleJointedArmSim(
-          DCMotor.getKrakenX60Foc(1),
+          DCMotor.getKrakenX60Foc({{ motors|length }}),
           {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Reduction,
           {{ name }}Constants.Sim.synced.getObject().{{ name|lowerfirst }}MomentOfInertia.in(KilogramSquareMeters),
           {{ name }}Constants.Sim.synced.getObject().{{ name|lowerfirst }}ArmLength.in(Meters),

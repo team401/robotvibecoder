@@ -65,7 +65,7 @@ public interface WristIO {
     /** Are the motors currently disabled in software? */
     public boolean motorsDisabled = false;
 
-    /** The current output mode of the elevator */
+    /** The current output mode of the Wrist */
     public WristOutputMode outputMode = WristOutputMode.ClosedLoop;
 
     /** The voltage currently applied to the motors */
@@ -128,7 +128,7 @@ public interface WristIO {
    */
   public void setOutputMode(WristOutputMode mode);
 
-  /** Update PID gains for the elevator */
+  /** Update PID gains for the Wrist */
   public void setPID(double p, double i, double d);
 
   /** Set profile constraints to be sent to Motion Magic Expo */
