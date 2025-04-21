@@ -1,5 +1,7 @@
 from jinja2 import Environment, PackageLoader, select_autoescape
 
+from robotvibecoder_aidnem import constants
+
 
 def article(word: str) -> str:
     return "an" if word[0].lower() in "aeiou" else "a"
@@ -29,7 +31,10 @@ def hash_can_id(device: str) -> str:
 
     if device not in canIdMap:
         canIdMap[device] = nextId
-        print(f"Mapped device {device} to placeholder CAN ID {nextId}")
+        print(f"  {constants.Colors.fg_green}➜{constants.Colors.reset} ", end="")
+        print(
+            f"Mapped device {constants.Colors.fg_cyan}{device}{constants.Colors.reset} to placeholder CAN ID {constants.Colors.fg_cyan}{nextId}{constants.Colors.reset}"
+        )
         nextId += 1
 
     return canIdMap[device]

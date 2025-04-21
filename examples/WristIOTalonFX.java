@@ -184,7 +184,7 @@ public class WristIOTalonFX implements WristIO {
 
           Logger.recordOutput(
               "wrist/referenceSlope",
-              leadMotor.getClosedLoopReferenceSlope().getValueAsDouble());
+              wristMotor.getClosedLoopReferenceSlope().getValueAsDouble());
           outputs.wristAppliedVolts.mut_replace(
               Volts.of(wristMotor.getClosedLoopOutput().getValueAsDouble()));
           outputs.pContrib.mut_replace(
