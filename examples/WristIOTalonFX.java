@@ -84,6 +84,7 @@ public class WristIOTalonFX implements WristIO {
 
     // Cache status signals and refresh them when used
     wristEncoderPosition = wristEncoder.getPosition();
+    wristEncoderVelocity = wristEncoder.getVelocity();
 
     wristMotorSupplyCurrent = wristMotor.getSupplyCurrent();
     wristMotorStatorCurrent = wristMotor.getStatorCurrent();
@@ -91,7 +92,8 @@ public class WristIOTalonFX implements WristIO {
     BaseStatusSignal.setUpdateFrequencyForAll(50.0,
         wristMotorSupplyCurrent,
         wristMotorStatorCurrent,
-        wristEncoderPosition
+        wristEncoderPosition,
+        wristEncoderVelocity
     );
 
     // Initialize talonFXConfigs to use FusedCANCoder and Motion Magic Expo and have correct PID
@@ -152,6 +154,7 @@ public class WristIOTalonFX implements WristIO {
 
     inputs.wristMotorSupplyCurrent.mut_replace(wristMotorSupplyCurrent.getValue());
     inputs.wristMotorStatorCurrent.mut_replace(wristMotorStatorCurrent.getValue());
+    inputs.wristMotorConnected = wristMotor.isConnected();
 
     inputs.wristEncoderGoalPos.mut_replace(wristEncoderGoalAngle);
     inputs.wristEncoderSetpointPos.mut_replace(wristEncoderSetpointPosition);

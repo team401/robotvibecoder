@@ -4,6 +4,7 @@ Subcommand to generate a new config
 
 from argparse import Namespace
 import json
+import os
 import sys
 
 from robotvibecoder_aidnem import constants
@@ -66,8 +67,10 @@ def new_config_interactive() -> MechanismConfig:
 
 
 def new(args: Namespace) -> None:
+    config_path = os.path.join(args.folder, args.outfile)
+
     print("[RobotVibeCoder] Creating a new config file")
-    print(f"  This will create/overwrite a file at `{args.outfile}`")
+    print(f"  This will create/overwrite a file at `{config_path}`")
     try:
         input("  Press Ctrl+C to cancel or [Enter] to continue")
     except KeyboardInterrupt:
@@ -80,6 +83,6 @@ def new(args: Namespace) -> None:
     else:
         config = constants.DEFAULT_CONFIG
 
-    print(f"[RobotVibeCoder] Writing config file at `{args.outfile}`")
-    with open(args.outfile, "w+") as outfile:
+    print(f"[RobotVibeCoder] Writing config file at `{config_path}`")
+    with open(config_path, "w+") as outfile:
         json.dump(config.__dict__, fp=outfile, indent=2)
