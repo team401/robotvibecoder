@@ -19,7 +19,7 @@ def upperfirst(word: str) -> str:
     return word[0].upper() + word[1:]
 
 
-canIdMap = {}
+canIdMap: dict[str, int] = {}
 nextId = 1
 
 
@@ -37,7 +37,7 @@ def hash_can_id(device: str) -> str:
         )
         nextId += 1
 
-    return canIdMap[device]
+    return str(canIdMap[device])
 
 
 def generate_env() -> Environment:

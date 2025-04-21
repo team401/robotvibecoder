@@ -27,7 +27,7 @@ def generate(args: Namespace) -> None:
             sys.exit(1)
         config_path = os.path.join(args.folder, args.config)
         print(f"[{constants.Colors.title_str}] Reading config file at {config_path}")
-        config: MechanismConfig = load_json_config(config_path)
+        config = load_json_config(config_path)
 
     validate_config(config)
 
