@@ -45,6 +45,8 @@ Package: will come after frc.robot (e.g. `subsystems.scoring`)
 > subsystems.scoring
 Name: should be capitalized and should not end in Mechanism or Subsystem, as this is automatically added
 > Elevator
+Kind: Should be either 'Elevator', 'Arm', or 'Flywheel'
+> Elevator
 CAN Bus: whatever the name of the mechanism's bus is (e.g. `canivore`)
 > canivore
 Number of motors (an integer, >= 1)
@@ -85,6 +87,16 @@ This process would produce the following JSON config:
 - ### `name`
 
   The name field is a string determining the name of the mechanism. This should be capitalized, and should not end with "mechanism" or "subsystem". For instance, the name string `Elevator` would generate IOs named `ElevatorIO.java`, `ElevatorIOTalonFX.java`, etc.
+
+- ### `kind`
+
+  The kind field is a string determining what kind of mechanism to generate. This should be either `Arm`, `Elevator`, or `Flywheel`. The kind (named kind instead of type because type is a reserved keyword in python) determines what type of sim to generate:
+  
+  - `Arm`: [`SingleJointedArmSim`](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/SingleJointedArmSim.html)
+  - `Elevator`: [`ElevatorSim`](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/ElevatorSim.html)
+  - `Flywheel`: [`FlywheelSim`](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/FlywheelSim.html)
+
+  **Note**: Currently, `Arm` is the only mechanism kind that is supported. The other two mechanisms will be added over the next few days.
 
 - ### `canbus`
 

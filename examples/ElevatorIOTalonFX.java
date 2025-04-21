@@ -31,7 +31,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.constants.subsystems.ElevatorConstants;
+import frc.robot.subsystems.scoring.ElevatorConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
@@ -74,9 +74,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   public ElevatorIOTalonFX() {
     // Initialize TalonFXs  and CANcoders with their correct IDs
     leadMotor = new TalonFX(ElevatorConstants.synced.getObject().leadMotorId, "canivore")
-    
     followerMotor = new TalonFX(ElevatorConstants.synced.getObject().followerMotorId, "canivore")
-    
 
     elevatorEncoder =
         new CANcoder(ElevatorConstants.synced.getObject().elevatorEncoderID, "canivore");
@@ -119,7 +117,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
                     .withSensorToMechanismRatio(
                         ElevatorConstants.synced.getObject().elevatorEncoderToMechanismRatio)
                     .withRotorToSensorRatio(
-                        ElevatorConstants.synced.getObject().rotorToelevatorEncoderRatio))
+                        ElevatorConstants.synced.getObject().rotorToElevatorEncoderRatio))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
@@ -153,7 +151,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     followerMotor.setControl(
         new Follower(
             leadMotor.getDeviceID(),
-            ElevatorConstants.synced.getObject().invertFollowermotorFollowerRequest));
+            ElevatorConstants.synced.getObject().invertFollowerMotorFollowerRequest));
   }
 
   @Override

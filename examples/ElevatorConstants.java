@@ -42,17 +42,11 @@ public final class ElevatorConstants {
           "ElevatorConstants.json",
           EnvironmentHandler.getEnvironmentHandler().getEnvironmentPathProvider(),
           new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
+
   public final Integer leadMotorId = 1; // TODO: Replace placeholder CAN ID
-  
   public final Integer followerMotorId = 2; // TODO: Replace placeholder CAN ID
-  
   public final Boolean invertFollowerElevatorMotor = true;
-    
-    
-    
-  public final Boolean invertFollowermotorFollowerRequest = false;
-    
-    
+  public final Boolean invertFollowerMotorFollowerRequest = false;
 
   /**
    * What point in the sensor's range the discontinuity occurs. Results in a range of [1-x, x). For
@@ -72,7 +66,7 @@ public final class ElevatorConstants {
   @JSONExclude public final double elevatorEncoderToMechanismRatio = 1.0;
 
   @JSONExclude
-  public final double rotorToelevatorEncoder Ratio = 1.0; // TODO: Replace placeholder value
+  public final double rotorToElevatorEncoderRatio = 1.0; // TODO: Replace placeholder value
 
   public final Double elevatorkP = 0.0;
   public final Double elevatorkI = 0.0;

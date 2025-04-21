@@ -3,6 +3,7 @@ import json
 import sys
 from robotvibecoder_aidnem.config import (
     MechanismConfig,
+    MechanismKind,
     generate_config_from_data,
     load_json_config,
     validate_config,
@@ -34,16 +35,22 @@ def generate(args: Namespace) -> None:
 
     env = generate_env()
 
-    file_templates = [
-        "{name}IO.java",
-        "{name}IOTalonFX.java",
-        "{name}Constants.java",
-    ]
+    if config.kind != MechanismKind.Arm:
+        raise NotImplementedError(
+            "Mechanism kinds beside Arm are not implemented yet :("
+        )
+
+    file_templates: dict[str, str] = {
+        "{name}IO.java.j2": "{name}IO.java",
+        "{name}IOTalonFX.java.j2": "{name}IOTalonFX.java",
+        "{name}Constants.java.j2": "{name}Constants.java",
+        config.kind + "{name}Sim.java.j2": "{name}IOSim.java",
+    }
 
     if not args.stdin:
         print("WARNING: This will create/overwrite files at the following paths:")
         for file_template in file_templates:
-            output_path = file_template.format(name = config.name)
+            output_path = file_templates[file_template].format(name=config.name)
             print(f"  {output_path}")
         try:
             input("\n  Press Ctrl+C to cancel or [Enter] to continue")
@@ -52,15 +59,17 @@ def generate(args: Namespace) -> None:
             sys.exit(0)
 
     for file_template in file_templates:
-        output_path = file_template.format(name = config.name)
+        output_path = file_templates[file_template].format(name=config.name)
 
         if os.path.exists(output_path) and args.stdin:
             # stdin mode skips the warning prompt at the start, so files would be destroyed, necessitating this check
-            print(f"Error: File {output_path} already exists. Please move/delete it and retry")
+            print(
+                f"Error: File {output_path} already exists. Please move/delete it and retry"
+            )
             sys.exit(1)
 
         print(f"Templating {output_path}")
-        template_path = file_template.format(name = "Mechanism") + ".j2" # E.g. MechanismIO.java.j2
+        template_path = file_template.format(name="Mechanism")
         template = env.get_template(template_path)
 
         output: str = template.render(config.__dict__)

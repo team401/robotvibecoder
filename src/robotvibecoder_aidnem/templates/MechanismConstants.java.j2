@@ -1,38 +1,21 @@
 package frc.robot.{{ package }}; // NOTE: This should be changed if you keep your constants in a separate package from your code
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
-import static edu.wpi.first.units.Units.VoltsPerRadianPerSecond;
-import static edu.wpi.first.units.Units.VoltsPerRadianPerSecondSquared;
 
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import coppercore.parameter_tools.json.JSONExclude;
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.path_provider.EnvironmentHandler;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.Per;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.Filesystem;
+
 
 public final class {{ name }}Constants {
   @JSONExclude
@@ -42,22 +25,23 @@ public final class {{ name }}Constants {
           "{{ name }}Constants.json",
           EnvironmentHandler.getEnvironmentHandler().getEnvironmentPathProvider(),
           new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
-
-  {%- for motor in motors %}
+{% for motor in motors %}
   public final Integer {{ motor }}Id = {{ motor|hash_can_id }}; // TODO: Replace placeholder CAN ID
-  {% endfor %}
-  public final Boolean invertFollowerElevatorMotor = true;
+  {%- endfor %}
+
     {%- for motor in motors%}
-    {% if motor != lead_motor%}
-  public final Boolean invert{{ motor|capitalize }}FollowerRequest = false;
-    {% endif %}
-    {% endfor %}
+    {%- if motor != lead_motor%}
+  public final Boolean invert{{ motor|upperfirst }}FollowerRequest = false;
+    {%- endif %}
+    {%- endfor %}
 
   /**
    * What point in the sensor's range the discontinuity occurs. Results in a range of [1-x, x). For
    * example, a value of 1 gives a range of [0.0, 1).
    */
   public final Double {{ encoder }}DiscontinuityPoint = 1.0;
+
+  public final Angle {{ encoder }}MagnetOffset = Radians.of(0.0);
 
   public final Integer {{ encoder }}ID = {{ encoder|hash_can_id }}; // TODO: Replace placeholder CAN ID
 
@@ -71,7 +55,7 @@ public final class {{ name }}Constants {
   @JSONExclude public final double {{ encoder }}ToMechanismRatio = 1.0;
 
   @JSONExclude
-  public final double rotorTo{{ encoder }} Ratio = 1.0; // TODO: Replace placeholder value
+  public final double rotorTo{{ encoder|upperfirst }}Ratio = 1.0; // TODO: Replace placeholder value
 
   public final Double {{ name|lowerfirst }}kP = 0.0;
   public final Double {{ name|lowerfirst }}kI = 0.0;
@@ -97,9 +81,11 @@ public final class {{ name }}Constants {
   /*
    * The Motion Magic Expo kA, measured in Volts per Radian per Second Squared, but represented as a double so it can be synced by JSONSync
   */
-  public final Double elevatorExpo_kA_raw = 0.0;
+  public final Double {{ name|lowerfirst }}Expo_kA_raw = 0.0;
 
   public final Current {{ name|lowerfirst }}StatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
+
+  public final Double {{ name|lowerfirst }}Reduction = 1.0; // TODO: Replace placeholder reduction
 
   public static final class Sim {
     @JSONExclude
@@ -117,5 +103,14 @@ public final class {{ name }}Constants {
 
     /** Standard deviation passed to sim for the velocity measurement */
     public final Double velocityStdDev = 0.0;
+{% if kind == "Arm" %}
+    @JSONExclude
+    public final MomentOfInertia {{ name|lowerfirst }}MomentOfInertia = KilogramSquareMeters.of(0.05); // TODO: Replace placeholder moment of inertia
+    public final Distance {{ name|lowerfirst }}ArmLength = Meters.of(1.0); // TODO: Replace placeholder arm length
+    public final Angle {{ name|lowerfirst }}MinAngle = Radians.of(0.0); // TODO: Update placeholder min & max angles
+    public final Angle {{ name|lowerfirst }}MaxAngle = Radians.of(1.0);
+
+    public final Angle {{ name|lowerfirst }}StartingAngle = Radians.of(0.0);
+{%- endif %}
   }
 }

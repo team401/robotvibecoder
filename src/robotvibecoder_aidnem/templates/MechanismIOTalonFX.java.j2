@@ -31,7 +31,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.constants.subsystems.ElevatorConstants;
+import frc.robot.{{ package }}.{{ name }}Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class {{ name }}IOTalonFX implements {{ name }}IO {
@@ -44,7 +44,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
   {{ name }}OutputMode outputMode = {{ name }}OutputMode.ClosedLoop;
 
   {%- for motor in motors %}
-  private TalonFX {{ motor }};
+  TalonFX {{ motor }};
   {% endfor %}
 
   CANcoder {{ encoder }};
@@ -55,7 +55,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
   boolean motorDisabled = false;
 
   private StatusSignal<Angle> {{ encoder }}Position;
-  private StatusSignal<Angle> {{ encoder }}Velocity;
+  private StatusSignal<AngularVelocity> {{ encoder }}Velocity;
   {%- for motor in motors %}
   private StatusSignal<Current> {{ motor }}SupplyCurrent;
   private StatusSignal<Current> {{ motor }}StatorCurrent;
@@ -68,11 +68,11 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
   VoltageOut voltageOut = new VoltageOut(0.0);
   TorqueCurrentFOC currentOut = new TorqueCurrentFOC(0.0);
 
-  public ElevatorIOTalonFX() {
+  public {{ name }}IOTalonFX() {
     // Initialize TalonFXs  and CANcoders with their correct IDs
     {%- for motor in motors %}
-    {{ motor }} = new TalonFX({{ name }}Constants.synced.getObject().{{ motor }}Id, "{{ canbus }}")
-    {% endfor %}
+    {{ motor }} = new TalonFX({{ name }}Constants.synced.getObject().{{ motor }}Id, "{{ canbus }}");
+    {%- endfor %}
 
     {{ encoder }} =
         new CANcoder({{ name }}Constants.synced.getObject().{{ encoder }}ID, "{{ canbus }}");
@@ -84,11 +84,12 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
     // Update with large CANcoder direction and apply
     cancoderConfiguration.MagnetSensor.SensorDirection =
         {{ name }}Constants.synced.getObject().{{ encoder }}Direction;
-    cancoderConfiguration.MagnetSensor.MagnetOffset = {{ name }}Constants.synced.getObject().{{ encoder }}MagnetOffset;
+    cancoderConfiguration.MagnetSensor.MagnetOffset = {{ name }}Constants.synced.getObject().{{ encoder }}MagnetOffset.in(Rotations);
     {{ encoder }}.getConfigurator().apply(cancoderConfiguration);
 
     // Cache status signals and refresh them when used
     {{ encoder }}Position = {{ encoder }}.getPosition();
+    {{ encoder }}Velocity = {{ encoder }}.getVelocity();
 {% for motor in motors %}
     {{ motor }}SupplyCurrent = {{ motor }}.getSupplyCurrent();
     {{ motor }}StatorCurrent = {{ motor }}.getStatorCurrent();
@@ -98,7 +99,8 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
         {{ motor }}SupplyCurrent,
         {{ motor }}StatorCurrent,
         {%- endfor %}
-        {{ encoder }}Position
+        {{ encoder }}Position,
+        {{ encoder }}Velocity
     );
 
     // Initialize talonFXConfigs to use FusedCANCoder and Motion Magic Expo and have correct PID
@@ -112,7 +114,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
                     .withSensorToMechanismRatio(
                         {{ name }}Constants.synced.getObject().{{ encoder }}ToMechanismRatio)
                     .withRotorToSensorRatio(
-                        {{ name }}Constants.synced.getObject().rotorTo{{ encoder }}Ratio))
+                        {{ name }}Constants.synced.getObject().rotorTo{{ encoder|upperfirst }}Ratio))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
@@ -121,7 +123,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
                         {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}StatorCurrentLimit))
             .withSlot0(
                 new Slot0Configs()
-                    .withGravityType(GravityTypeValue.Elevator_Static)
+                    .withGravityType(GravityTypeValue.{% if kind == "Arm" %}Arm_Cosine{% else %}Elevator_Static{% endif %})
                     .withKS({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kS)
                     .withKV({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kV)
                     .withKA({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kA)
@@ -149,7 +151,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
     {{ motor }}.setControl(
         new Follower(
             {{ lead_motor }}.getDeviceID(),
-            {{ name }}Constants.synced.getObject().invert{{ motor|capitalize }}FollowerRequest));
+            {{ name }}Constants.synced.getObject().invert{{ motor|upperfirst }}FollowerRequest));
         {%- endif %}
     {%- endfor %}
   }
@@ -171,13 +173,14 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
 {% for motor in motors %}
     inputs.{{ motor }}SupplyCurrent.mut_replace({{ motor }}SupplyCurrent.getValue());
     inputs.{{ motor }}StatorCurrent.mut_replace({{ motor }}StatorCurrent.getValue());
+    inputs.{{ motor }}Connected = {{ motor }}.isConnected();
 {% endfor %}
     inputs.{{ encoder }}GoalPos.mut_replace({{ encoder }}GoalAngle);
     inputs.{{ encoder }}SetpointPos.mut_replace({{ encoder }}SetpointPosition);
 
     inputs.motionMagicError = {{ lead_motor }}.getClosedLoopError().getValueAsDouble();
 
-    inputs.{{ name|lowerfirst }}MechanismVelocity.mut_replace({{ encoder }}.getVelocity().getValue());
+    inputs.{{ name|lowerfirst }}Velocity.mut_replace({{ encoder }}.getVelocity().getValue());
   }
 
   @Override
@@ -223,12 +226,12 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
   }
 
   @Override
-  public void {{ encoder }}GoalPos(Angle goalPos) {
+  public void set{{ encoder|upperfirst }}GoalPos(Angle goalPos) {
     {{ encoder }}GoalAngle.mut_replace(goalPos);
   }
 
   @Override
-  public void set{{ encoder }}Position(Angle newAngle) {
+  public void set{{ encoder|upperfirst }}Position(Angle newAngle) {
     {{ encoder }}.setPosition(newAngle);
   }
 

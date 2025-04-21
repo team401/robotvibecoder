@@ -1,12 +1,20 @@
 from dataclasses import dataclass, fields
+from enum import Enum
 import json
 import sys
+
+
+class MechanismKind(str, Enum):
+    Arm = "Arm"
+    Elevator = "Elevator"
+    Flywheel = "Flywheel"
 
 
 @dataclass
 class MechanismConfig:
     package: str
     name: str
+    kind: MechanismKind
     canbus: str
     motors: list[str]
     lead_motor: str
@@ -52,6 +60,10 @@ def validate_config(config: MechanismConfig) -> None:
     """
 
     if config.lead_motor not in config.motors:
-        print(f"Error in config `{config.name}`: `lead_motor` must be one of the motors specified by `motors`")
-        print(f"  Found `{config.lead_motor}` but expected one of {', '.join(['`' + motor + '`' for motor in config.motors])}")
+        print(
+            f"Error in config `{config.name}`: `lead_motor` must be one of the motors specified by `motors`"
+        )
+        print(
+            f"  Found `{config.lead_motor}` but expected one of {', '.join(['`' + motor + '`' for motor in config.motors])}"
+        )
         sys.exit(1)
