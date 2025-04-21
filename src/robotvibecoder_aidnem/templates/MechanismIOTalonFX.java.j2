@@ -89,6 +89,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
 
     // Cache status signals and refresh them when used
     {{ encoder }}Position = {{ encoder }}.getPosition();
+    {{ encoder }}Velocity = {{ encoder }}.getVelocity();
 {% for motor in motors %}
     {{ motor }}SupplyCurrent = {{ motor }}.getSupplyCurrent();
     {{ motor }}StatorCurrent = {{ motor }}.getStatorCurrent();
@@ -98,7 +99,8 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
         {{ motor }}SupplyCurrent,
         {{ motor }}StatorCurrent,
         {%- endfor %}
-        {{ encoder }}Position
+        {{ encoder }}Position,
+        {{ encoder }}Velocity
     );
 
     // Initialize talonFXConfigs to use FusedCANCoder and Motion Magic Expo and have correct PID
@@ -171,6 +173,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
 {% for motor in motors %}
     inputs.{{ motor }}SupplyCurrent.mut_replace({{ motor }}SupplyCurrent.getValue());
     inputs.{{ motor }}StatorCurrent.mut_replace({{ motor }}StatorCurrent.getValue());
+    inputs.{{ motor }}Connected = {{ motor }}.isConnected();
 {% endfor %}
     inputs.{{ encoder }}GoalPos.mut_replace({{ encoder }}GoalAngle);
     inputs.{{ encoder }}SetpointPos.mut_replace({{ encoder }}SetpointPosition);
