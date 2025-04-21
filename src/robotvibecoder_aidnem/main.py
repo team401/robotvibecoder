@@ -1,6 +1,7 @@
 import argparse
 import sys
 from sys import argv
+from robotvibecoder_aidnem import constants
 from robotvibecoder_aidnem.config import load_json_config
 from robotvibecoder_aidnem.templating import generate_env
 from robotvibecoder_aidnem.subcommands.new import new
@@ -52,6 +53,10 @@ def main() -> None:
     args = parser.parse_args()
     # Call the default function defined by the subcommand
     args.func(args)
+
+    print(
+        f"{constants.Colors.fg_green}{constants.Colors.bold}Done.{constants.Colors.reset}"
+    )
 
 
 if __name__ == "__main__":

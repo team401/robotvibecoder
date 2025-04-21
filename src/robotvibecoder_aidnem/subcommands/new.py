@@ -69,8 +69,10 @@ def new_config_interactive() -> MechanismConfig:
 def new(args: Namespace) -> None:
     config_path = os.path.join(args.folder, args.outfile)
 
-    print("[RobotVibeCoder] Creating a new config file")
-    print(f"  This will create/overwrite a file at `{config_path}`")
+    print(f"[{constants.Colors.title_str}] Creating a new config file")
+    print(
+        f"  {constants.Colors.fg_red}{constants.Colors.bold}WARNING{constants.Colors.reset}: This will create/overwrite a file at `{constants.Colors.fg_cyan}{config_path}{constants.Colors.reset}`"
+    )
     try:
         input("  Press Ctrl+C to cancel or [Enter] to continue")
     except KeyboardInterrupt:
@@ -83,6 +85,6 @@ def new(args: Namespace) -> None:
     else:
         config = constants.DEFAULT_CONFIG
 
-    print(f"[RobotVibeCoder] Writing config file at `{config_path}`")
+    print(f"[{constants.Colors.title_str}] Writing config file")
     with open(config_path, "w+") as outfile:
         json.dump(config.__dict__, fp=outfile, indent=2)

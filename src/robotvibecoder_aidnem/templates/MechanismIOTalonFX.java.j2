@@ -203,7 +203,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
 
           Logger.recordOutput(
               "{{ name|lowerfirst }}/referenceSlope",
-              leadMotor.getClosedLoopReferenceSlope().getValueAsDouble());
+              {{ lead_motor }}.getClosedLoopReferenceSlope().getValueAsDouble());
           outputs.{{ name|lowerfirst }}AppliedVolts.mut_replace(
               Volts.of({{ lead_motor }}.getClosedLoopOutput().getValueAsDouble()));
           outputs.pContrib.mut_replace(
