@@ -12,8 +12,14 @@ def plural(words: list[str]) -> str:
 def lowerfirst(word: str) -> str:
     return word[0].lower() + word[1:]
 
+
+def upperfirst(word: str) -> str:
+    return word[0].upper() + word[1:]
+
+
 canIdMap = {}
 nextId = 1
+
 
 def hash_can_id(device: str) -> str:
     """
@@ -28,6 +34,7 @@ def hash_can_id(device: str) -> str:
 
     return canIdMap[device]
 
+
 def generate_env() -> Environment:
     env = Environment(
         loader=PackageLoader("robotvibecoder_aidnem"), autoescape=select_autoescape()
@@ -36,6 +43,7 @@ def generate_env() -> Environment:
     env.filters["article"] = article
     env.filters["plural"] = plural
     env.filters["lowerfirst"] = lowerfirst
+    env.filters["upperfirst"] = upperfirst
     env.filters["hash_can_id"] = hash_can_id
 
     return env

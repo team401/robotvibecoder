@@ -49,7 +49,7 @@ public final class {{ name }}Constants {
   public final Boolean invertFollowerElevatorMotor = true;
     {%- for motor in motors%}
     {% if motor != lead_motor%}
-  public final Boolean invert{{ motor|capitalize }}FollowerRequest = false;
+  public final Boolean invert{{ motor|upperfirst }}FollowerRequest = false;
     {% endif %}
     {% endfor %}
 
@@ -71,7 +71,7 @@ public final class {{ name }}Constants {
   @JSONExclude public final double {{ encoder }}ToMechanismRatio = 1.0;
 
   @JSONExclude
-  public final double rotorTo{{ encoder }} Ratio = 1.0; // TODO: Replace placeholder value
+  public final double rotorTo{{ encoder|upperfirst }} Ratio = 1.0; // TODO: Replace placeholder value
 
   public final Double {{ name|lowerfirst }}kP = 0.0;
   public final Double {{ name|lowerfirst }}kI = 0.0;

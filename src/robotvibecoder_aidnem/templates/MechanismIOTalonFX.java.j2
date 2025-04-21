@@ -31,7 +31,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.Per;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.constants.subsystems.ElevatorConstants;
+import frc.robot.{{ package }}.ElevatorConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class {{ name }}IOTalonFX implements {{ name }}IO {
@@ -72,7 +72,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
     // Initialize TalonFXs  and CANcoders with their correct IDs
     {%- for motor in motors %}
     {{ motor }} = new TalonFX({{ name }}Constants.synced.getObject().{{ motor }}Id, "{{ canbus }}")
-    {% endfor %}
+    {%- endfor %}
 
     {{ encoder }} =
         new CANcoder({{ name }}Constants.synced.getObject().{{ encoder }}ID, "{{ canbus }}");
@@ -112,7 +112,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
                     .withSensorToMechanismRatio(
                         {{ name }}Constants.synced.getObject().{{ encoder }}ToMechanismRatio)
                     .withRotorToSensorRatio(
-                        {{ name }}Constants.synced.getObject().rotorTo{{ encoder }}Ratio))
+                        {{ name }}Constants.synced.getObject().rotorTo{{ encoder|upperfirst }}Ratio))
             .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast))
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
@@ -149,7 +149,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
     {{ motor }}.setControl(
         new Follower(
             {{ lead_motor }}.getDeviceID(),
-            {{ name }}Constants.synced.getObject().invert{{ motor|capitalize }}FollowerRequest));
+            {{ name }}Constants.synced.getObject().invert{{ motor|upperfirst }}FollowerRequest));
         {%- endif %}
     {%- endfor %}
   }

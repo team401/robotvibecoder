@@ -50,7 +50,7 @@ public final class ElevatorConstants {
     
     
     
-  public final Boolean invertFollowermotorFollowerRequest = false;
+  public final Boolean invertFollowerMotorFollowerRequest = false;
     
     
 
@@ -72,7 +72,7 @@ public final class ElevatorConstants {
   @JSONExclude public final double elevatorEncoderToMechanismRatio = 1.0;
 
   @JSONExclude
-  public final double rotorToelevatorEncoder Ratio = 1.0; // TODO: Replace placeholder value
+  public final double rotorToElevatorEncoder Ratio = 1.0; // TODO: Replace placeholder value
 
   public final Double elevatorkP = 0.0;
   public final Double elevatorkI = 0.0;
