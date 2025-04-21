@@ -1,0 +1,55 @@
+{% extends 'MechanismIOSim.java.j2' %}
+{%- block unit_imports %}
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+{% endblock %}
+{%- block sim_import %}
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+{%- endblock %}
+{%- block sim_declaration %}
+  private final SingleJointedArmSim {{ name|lowerfirst }}Sim =
+      new SingleJointedArmSim(
+          DCMotor.getKrakenX60Foc(1),
+          {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Reduction,
+          {{ name }}Constants.Sim.synced.getObject().{{ name|lowerfirst }}MomentOfInertia.in(KilogramSquareMeters),
+          {{ name }}Constants.Sim.synced.getObject().{{ name|lowerfirst }}ArmLength.in(Meters),
+          {{ name }}Constants.Sim.synced.getObject().{{ name|lowerfirst }}MinAngle.in(Radians),
+          {{ name }}Constants.Sim.synced.getObject().{{ name|lowerfirst }}MaxAngle.in(Radians),
+          true,
+          {{ name}}Constants.Sim.synced.getObject().{{ name|lowerfirst }}StartingAngle.in(Radians));
+
+  MutAngle last{{ name }}Angle = Radians.mutable(0.0);
+{%- endblock %}
+{%- block update_sim_state %}
+    Angle {{ name|lowerfirst }}Angle = Radians.of(wristSim.getAngleRads());
+    AngularVelocity {{ name|lowerfirst }}Velocity = RadiansPerSecond.of({{ name|lowerfirst }}Sim.getVelocityRadPerSec());
+
+    Angle diffAngle = {{ name|lowerfirst }}Angle.minus(last{{ name }}Angle);
+    last{{ name }}Angle.mut_replace({{ name|lowerfirst }}Angle);
+
+    // 1:1 ratio of {{ name }} to CANcoder makes this math very easy
+    {{ encoder }}SimState.setRawPosition(
+        {{ name|lowerfirst }}Angle.minus(
+            {{ name }}Constants.synced.getObject()
+                .wristCANcoderMagnetOffset)); // Subtract the magnet offset since it's 0 in sim
+    {{ encoder }}SimState.setVelocity({{ name|lowerfirst }}Velocity);
+
+    Angle rotorDiffAngle = diffAngle.times({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Reduction);
+    AngularVelocity rotorVelocity =
+        {{ name|lowerfirst }}Velocity.times({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Reduction);
+
+    {%- for motor in motors %}
+    {{ motor }}SimState.addRotorPosition(rotorDiffAngle);
+    {{ motor }}SimState.setRotorVelocity(rotorVelocity);
+    {{ motor }}SimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+    {%- endfor %}
+
+    {{ name|lowerfirst }}Sim.setInputVoltage({{ lead_motor }}SimState.getMotorVoltage());
+
+    Logger.recordOutput("{{ name|lowerfirst }}Sim/position", {{ name|lowerfirst }}Angle.in(Radians));
+
+    {{ name|lowerfirst }}Sim.update(SimConstants.simDeltaTime.in(Seconds));
+{%- endblock %}

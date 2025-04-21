@@ -1,0 +1,42 @@
+package frc.robot.{{ package }};
+{% block unit_imports required %}{% endblock %}
+import com.ctre.phoenix6.sim.CANcoderSimState;
+import com.ctre.phoenix6.sim.ChassisReference;
+import com.ctre.phoenix6.sim.TalonFXSimState;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.wpilibj.RobotController;
+{%- block sim_import required %}{%endblock %}
+import frc.robot.constants.JsonConstants;
+import frc.robot.constants.SimConstants;
+import org.littletonrobotics.junction.Logger;
+
+public class {{ name }}IOSim extends {{ name }}IOTalonFX {
+  CANcoderSimState {{ encoder }}SimState = {{ encoder }}coder.getSimState();
+{% for motor in motors %}
+  TalonFXSimState {{ motor }}SimState = {{ motor }}.getSimState();
+  {%- endfor %}
+{% block sim_declaration required %}{% endblock %}
+
+  public {{ name }}IOSim() {
+    super();
+
+    {{ encoder }}SimState.Orientation = ChassisReference.Clockwise_Positive;
+
+    // Initialize sim state so that the first periodic runs with accurate data
+    updateSimState();
+  }
+
+  private void updateSimState() {
+    {%-block update_sim_state required %}{% endblock %}
+  }
+
+  @Override
+  public void updateInputs({{ name }}Inputs inputs) {
+    updateSimState();
+
+    super.updateInputs(inputs);
+  }
+}

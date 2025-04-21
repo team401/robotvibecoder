@@ -7,7 +7,7 @@ import json
 import sys
 
 from robotvibecoder_aidnem import constants
-from robotvibecoder_aidnem.config import MechanismConfig
+from robotvibecoder_aidnem.config import MechanismConfig, MechanismKind
 
 
 def new_config_interactive() -> MechanismConfig:
@@ -20,6 +20,14 @@ def new_config_interactive() -> MechanismConfig:
         "Name: should be capitalized and should not end in Mechanism or Subsystem, as this is automatically added"
     )
     name: str = input("> ")
+
+    print("Kind: Should be either 'Elevator', 'Arm', or 'Flywheel'")
+    kind: str = ""
+    while kind not in MechanismKind:
+        kind = input("> ")
+        if kind not in MechanismKind:
+            print("Please input either Elevator, Arm, or Flywheel.")
+    kind_enum: MechanismKind = kind
 
     print("CAN Bus: whatever the name of the mechanism's bus is (e.g. `canivore`)")
     canbus: str = input("> ")
@@ -52,7 +60,9 @@ def new_config_interactive() -> MechanismConfig:
 
     encoder: str = input("Encoder name: a camelcase encoder name (e.g. armEncoder)\n> ")
 
-    return MechanismConfig(package, name, canbus, motors, lead_motor, encoder)
+    return MechanismConfig(
+        package, name, kind_enum, canbus, motors, lead_motor, encoder
+    )
 
 
 def new(args: Namespace) -> None:

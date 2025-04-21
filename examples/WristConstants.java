@@ -1,4 +1,4 @@
-package frc.robot.{{ package }}; // NOTE: This should be changed if you keep your constants in a separate package from your code
+package frc.robot.subsystems.scoring; // NOTE: This should be changed if you keep your constants in a separate package from your code
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
@@ -34,55 +34,49 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Filesystem;
 
-public final class {{ name }}Constants {
+public final class WristConstants {
   @JSONExclude
-  public static final JSONSync<{{ name }}Constants> synced =
-      new JSONSync<{{ name }}Constants>(
-          new {{ name }}Constants(),
-          "{{ name }}Constants.json",
+  public static final JSONSync<WristConstants> synced =
+      new JSONSync<WristConstants>(
+          new WristConstants(),
+          "WristConstants.json",
           EnvironmentHandler.getEnvironmentHandler().getEnvironmentPathProvider(),
           new JSONSyncConfigBuilder().setPrettyPrinting(true).build());
-{% for motor in motors %}
-  public final Integer {{ motor }}Id = {{ motor|hash_can_id }}; // TODO: Replace placeholder CAN ID
-  {%- endfor %}
+
+  public final Integer wristMotorId = 1; // TODO: Replace placeholder CAN ID
   public final Boolean invertFollowerElevatorMotor = true;
-    {%- for motor in motors%}
-    {%- if motor != lead_motor%}
-  public final Boolean invert{{ motor|upperfirst }}FollowerRequest = false;
-    {%- endif %}
-    {%- endfor %}
 
   /**
    * What point in the sensor's range the discontinuity occurs. Results in a range of [1-x, x). For
    * example, a value of 1 gives a range of [0.0, 1).
    */
-  public final Double {{ encoder }}DiscontinuityPoint = 1.0;
+  public final Double wristEncoderDiscontinuityPoint = 1.0;
 
-  public final Integer {{ encoder }}ID = {{ encoder|hash_can_id }}; // TODO: Replace placeholder CAN ID
+  public final Integer wristEncoderID = 2; // TODO: Replace placeholder CAN ID
 
-  public final SensorDirectionValue {{ encoder }}Direction =
+  public final SensorDirectionValue wristEncoderDirection =
       SensorDirectionValue.Clockwise_Positive;
 
   /*
-   * The {{ encoder }} is represented as the mechanism in our Phoenix configs.
+   * The wristEncoder is represented as the mechanism in our Phoenix configs.
    * This means that we are controlling to a goal in terms of large CANCoder angle.
    */
-  @JSONExclude public final double {{ encoder }}ToMechanismRatio = 1.0;
+  @JSONExclude public final double wristEncoderToMechanismRatio = 1.0;
 
   @JSONExclude
-  public final double rotorTo{{ encoder|upperfirst }}Ratio = 1.0; // TODO: Replace placeholder value
+  public final double rotorToWristEncoderRatio = 1.0; // TODO: Replace placeholder value
 
-  public final Double {{ name|lowerfirst }}kP = 0.0;
-  public final Double {{ name|lowerfirst }}kI = 0.0;
-  public final Double {{ name|lowerfirst }}kD = 0.0;
+  public final Double wristkP = 0.0;
+  public final Double wristkI = 0.0;
+  public final Double wristkD = 0.0;
 
-  public final Double {{ name|lowerfirst }}kS = 0.0;
-  public final Double {{ name|lowerfirst }}kV = 0.0;
-  public final Double {{ name|lowerfirst }}kA = 0.0;
-  public final Double {{ name|lowerfirst }}kG = 0.0;
+  public final Double wristkS = 0.0;
+  public final Double wristkV = 0.0;
+  public final Double wristkA = 0.0;
+  public final Double wristkG = 0.0;
 
   /** This is a Double until coppercore JSONSync supports RotationsPerSecond */
-  public final Double {{ name|lowerfirst }}AngularCruiseVelocityRotationsPerSecond = 1.0;
+  public final Double wristAngularCruiseVelocityRotationsPerSecond = 1.0;
 
   /*
    * The Motion Magic Expo kV, measured in Volts per Radian per Second, but represented as a double so it can be synced by JSONSync
@@ -91,25 +85,25 @@ public final class {{ name }}Constants {
    * kV results in the maximum velocity of the system. Therefore, a higher profile kV results in a
    * lower profile velocity.
   */
-  public final Double {{ name|lowerfirst }}Expo_kV_raw = 0.0;
+  public final Double wristExpo_kV_raw = 0.0;
 
   /*
    * The Motion Magic Expo kA, measured in Volts per Radian per Second Squared, but represented as a double so it can be synced by JSONSync
   */
   public final Double elevatorExpo_kA_raw = 0.0;
 
-  public final Current {{ name|lowerfirst }}StatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
+  public final Current wristStatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
 
-  public final Double {{ name|lowerfirst }}Reduction = 1.0; // TODO: Replace placeholder reduction
+  public final Double wristReduction = 1.0; // TODO: Replace placeholder reduction
 
   public static final class Sim {
     @JSONExclude
-    public static final JSONSync<{{ name }}Constants.Sim> synced =
-        new JSONSync<{{ name }}Constants.Sim>(
-            new {{ name }}Constants.Sim(),
+    public static final JSONSync<WristConstants.Sim> synced =
+        new JSONSync<WristConstants.Sim>(
+            new WristConstants.Sim(),
             Filesystem.getDeployDirectory()
                 .toPath()
-                .resolve("constants/{{ name }}Constants.Sim.json")
+                .resolve("constants/WristConstants.Sim.json")
                 .toString(),
             new JSONSyncConfigBuilder().build());
 
@@ -118,14 +112,13 @@ public final class {{ name }}Constants {
 
     /** Standard deviation passed to sim for the velocity measurement */
     public final Double velocityStdDev = 0.0;
-{% if kind == "Arm" %}
-    @JSONExclude
-    public final MomentOfInertia {{ name|lowerfirst }}MomentOfInertia = KilogramSquareMeters.of(0.05); // TODO: Replace placeholder moment of inertia
-    public final Distance {{ name|lowerfirst }}ArmLength = Meters.of(1.0); // TODO: Replace placeholder arm length
-    public final Angle {{ name|lowerfirst }}MinAngle = Radians.of(0.0); // TODO: Update placeholder min & max angles
-    public final Angle {{ name|lowerfirst }}MaxAngle = Radians.of(1.0);
 
-    public final Angle {{ name|lowerfirst }}StartingAngle = Radians.of(0.0);
-{%- endif %}
+    @JSONExclude
+    public final MomentOfInertia wristMomentOfInertia = KilogramSquareMeters.of(0.05); // TODO: Replace placeholder moment of inertia
+    public final Distance wristArmLength = Meters.of(1.0); // TODO: Replace placeholder arm length
+    public final Angle wristMinAngle = Radians.of(0.0); // TODO: Update placeholder min & max angles
+    public final Angle wristMaxAngle = Radians.of(1.0);
+
+    public final Angle wristStartingAngle = Radians.of(0.0);
   }
 }
