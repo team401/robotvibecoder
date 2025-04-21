@@ -1,38 +1,21 @@
 package frc.robot.subsystems.scoring; // NOTE: This should be changed if you keep your constants in a separate package from your code
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Volts;
-import static edu.wpi.first.units.Units.VoltsPerRadianPerSecond;
-import static edu.wpi.first.units.Units.VoltsPerRadianPerSecondSquared;
 
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import coppercore.parameter_tools.json.JSONExclude;
 import coppercore.parameter_tools.json.JSONSync;
 import coppercore.parameter_tools.json.JSONSyncConfigBuilder;
 import coppercore.parameter_tools.path_provider.EnvironmentHandler;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.AngularAccelerationUnit;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.PerUnit;
-import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.Per;
-import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.Filesystem;
+
 
 public final class WristConstants {
   @JSONExclude
@@ -50,6 +33,8 @@ public final class WristConstants {
    * example, a value of 1 gives a range of [0.0, 1).
    */
   public final Double wristEncoderDiscontinuityPoint = 1.0;
+
+  public final Angle wristEncoderMagnetOffset = Radians.of(0.0);
 
   public final Integer wristEncoderID = 2; // TODO: Replace placeholder CAN ID
 

@@ -44,7 +44,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
   {{ name }}OutputMode outputMode = {{ name }}OutputMode.ClosedLoop;
 
   {%- for motor in motors %}
-  private TalonFX {{ motor }};
+  TalonFX {{ motor }};
   {% endfor %}
 
   CANcoder {{ encoder }};
@@ -55,7 +55,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
   boolean motorDisabled = false;
 
   private StatusSignal<Angle> {{ encoder }}Position;
-  private StatusSignal<Angle> {{ encoder }}Velocity;
+  private StatusSignal<AngularVelocity> {{ encoder }}Velocity;
   {%- for motor in motors %}
   private StatusSignal<Current> {{ motor }}SupplyCurrent;
   private StatusSignal<Current> {{ motor }}StatorCurrent;
@@ -71,7 +71,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
   public {{ name }}IOTalonFX() {
     // Initialize TalonFXs  and CANcoders with their correct IDs
     {%- for motor in motors %}
-    {{ motor }} = new TalonFX({{ name }}Constants.synced.getObject().{{ motor }}Id, "{{ canbus }}")
+    {{ motor }} = new TalonFX({{ name }}Constants.synced.getObject().{{ motor }}Id, "{{ canbus }}");
     {%- endfor %}
 
     {{ encoder }} =
@@ -84,7 +84,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
     // Update with large CANcoder direction and apply
     cancoderConfiguration.MagnetSensor.SensorDirection =
         {{ name }}Constants.synced.getObject().{{ encoder }}Direction;
-    cancoderConfiguration.MagnetSensor.MagnetOffset = {{ name }}Constants.synced.getObject().{{ encoder }}MagnetOffset;
+    cancoderConfiguration.MagnetSensor.MagnetOffset = {{ name }}Constants.synced.getObject().{{ encoder }}MagnetOffset.in(Rotations);
     {{ encoder }}.getConfigurator().apply(cancoderConfiguration);
 
     // Cache status signals and refresh them when used
@@ -177,7 +177,7 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
 
     inputs.motionMagicError = {{ lead_motor }}.getClosedLoopError().getValueAsDouble();
 
-    inputs.{{ name|lowerfirst }}MechanismVelocity.mut_replace({{ encoder }}.getVelocity().getValue());
+    inputs.{{ name|lowerfirst }}Velocity.mut_replace({{ encoder }}.getVelocity().getValue());
   }
 
   @Override
@@ -223,12 +223,12 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
   }
 
   @Override
-  public void {{ encoder }}GoalPos(Angle goalPos) {
+  public void set{{ encoder|upperfirst }}GoalPos(Angle goalPos) {
     {{ encoder }}GoalAngle.mut_replace(goalPos);
   }
 
   @Override
-  public void set{{ encoder }}Position(Angle newAngle) {
+  public void set{{ encoder|upperfirst }}Position(Angle newAngle) {
     {{ encoder }}.setPosition(newAngle);
   }
 

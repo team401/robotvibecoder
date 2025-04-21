@@ -37,6 +37,8 @@ public interface WristIO {
     public MutCurrent wristMotorSupplyCurrent = Amps.mutable(0.0);
     
 
+    public boolean wristEncoderConnected = false;
+
     /** Current position of the wristEncoder. This measures total rotation since power on, not absolute position */
     public MutAngle wristEncoderPos = Rotations.mutable(0.0);
 
@@ -101,13 +103,13 @@ public interface WristIO {
    * Set the goal position of wristEncoder which the Wrist will control to when it is not in
    * override mode
    */
-  public void setwristEncoderGoalPos(Angle goalPos);
+  public void setWristEncoderGoalPos(Angle goalPos);
 
   /**
    * Set the position of the wristEncoder. This position is separate from absolute position and
    * can track multiple rotations.
    */
-  public void setPosition(Angle newAngle);
+  public void setWristEncoderPosition(Angle newAngle);
 
   /**
    * Set the override voltage for the Wrist when in Voltage output mode

@@ -20,7 +20,7 @@ import frc.robot.constants.SimConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class WristIOSim extends WristIOTalonFX {
-  CANcoderSimState wristEncoderSimState = wristEncodercoder.getSimState();
+  CANcoderSimState wristEncoderSimState = wristEncoder.getSimState();
 
   TalonFXSimState wristMotorSimState = wristMotor.getSimState();
 
@@ -57,7 +57,7 @@ public class WristIOSim extends WristIOTalonFX {
     wristEncoderSimState.setRawPosition(
         wristAngle.minus(
             WristConstants.synced.getObject()
-                .wristCANcoderMagnetOffset)); // Subtract the magnet offset since it's 0 in sim
+                .wristEncoderMagnetOffset)); // Subtract the magnet offset since it's 0 in sim
     wristEncoderSimState.setVelocity(wristVelocity);
 
     Angle rotorDiffAngle = diffAngle.times(WristConstants.synced.getObject().wristReduction);

@@ -14,7 +14,7 @@ import frc.robot.constants.SimConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class {{ name }}IOSim extends {{ name }}IOTalonFX {
-  CANcoderSimState {{ encoder }}SimState = {{ encoder }}coder.getSimState();
+  CANcoderSimState {{ encoder }}SimState = {{ encoder }}.getSimState();
 {% for motor in motors %}
   TalonFXSimState {{ motor }}SimState = {{ motor }}.getSimState();
   {%- endfor %}

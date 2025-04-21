@@ -38,6 +38,8 @@ public interface {{ name }}IO {
     public MutCurrent {{ motor }}SupplyCurrent = Amps.mutable(0.0);
     {% endfor %}
 
+    public boolean {{ encoder }}Connected = false;
+
     /** Current position of the {{ encoder }}. This measures total rotation since power on, not absolute position */
     public MutAngle {{ encoder }}Pos = Rotations.mutable(0.0);
 
@@ -102,13 +104,13 @@ public interface {{ name }}IO {
    * Set the goal position of {{ encoder }} which the {{ name }} will control to when it is not in
    * override mode
    */
-  public void set{{ encoder }}GoalPos(Angle goalPos);
+  public void set{{ encoder|upperfirst }}GoalPos(Angle goalPos);
 
   /**
    * Set the position of the {{ encoder }}. This position is separate from absolute position and
    * can track multiple rotations.
    */
-  public void set{{ position }}Position(Angle newAngle);
+  public void set{{ encoder|upperfirst }}Position(Angle newAngle);
 
   /**
    * Set the override voltage for the {{ name }} when in Voltage output mode

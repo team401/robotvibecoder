@@ -42,7 +42,7 @@ public class WristIOTalonFX implements WristIO {
   Voltage overrideVoltage;
 
   WristOutputMode outputMode = WristOutputMode.ClosedLoop;
-  private TalonFX wristMotor;
+  TalonFX wristMotor;
   
 
   CANcoder wristEncoder;
@@ -53,7 +53,7 @@ public class WristIOTalonFX implements WristIO {
   boolean motorDisabled = false;
 
   private StatusSignal<Angle> wristEncoderPosition;
-  private StatusSignal<Angle> wristEncoderVelocity;
+  private StatusSignal<AngularVelocity> wristEncoderVelocity;
   private StatusSignal<Current> wristMotorSupplyCurrent;
   private StatusSignal<Current> wristMotorStatorCurrent;
 
@@ -67,7 +67,7 @@ public class WristIOTalonFX implements WristIO {
 
   public WristIOTalonFX() {
     // Initialize TalonFXs  and CANcoders with their correct IDs
-    wristMotor = new TalonFX(WristConstants.synced.getObject().wristMotorId, "canivore")
+    wristMotor = new TalonFX(WristConstants.synced.getObject().wristMotorId, "canivore");
 
     wristEncoder =
         new CANcoder(WristConstants.synced.getObject().wristEncoderID, "canivore");
@@ -79,7 +79,7 @@ public class WristIOTalonFX implements WristIO {
     // Update with large CANcoder direction and apply
     cancoderConfiguration.MagnetSensor.SensorDirection =
         WristConstants.synced.getObject().wristEncoderDirection;
-    cancoderConfiguration.MagnetSensor.MagnetOffset = WristConstants.synced.getObject().wristEncoderMagnetOffset;
+    cancoderConfiguration.MagnetSensor.MagnetOffset = WristConstants.synced.getObject().wristEncoderMagnetOffset.in(Rotations);
     wristEncoder.getConfigurator().apply(cancoderConfiguration);
 
     // Cache status signals and refresh them when used
@@ -158,7 +158,7 @@ public class WristIOTalonFX implements WristIO {
 
     inputs.motionMagicError = wristMotor.getClosedLoopError().getValueAsDouble();
 
-    inputs.wristMechanismVelocity.mut_replace(wristEncoder.getVelocity().getValue());
+    inputs.wristVelocity.mut_replace(wristEncoder.getVelocity().getValue());
   }
 
   @Override
@@ -204,12 +204,12 @@ public class WristIOTalonFX implements WristIO {
   }
 
   @Override
-  public void wristEncoderGoalPos(Angle goalPos) {
+  public void setWristEncoderGoalPos(Angle goalPos) {
     wristEncoderGoalAngle.mut_replace(goalPos);
   }
 
   @Override
-  public void setwristEncoderPosition(Angle newAngle) {
+  public void setWristEncoderPosition(Angle newAngle) {
     wristEncoder.setPosition(newAngle);
   }
 
