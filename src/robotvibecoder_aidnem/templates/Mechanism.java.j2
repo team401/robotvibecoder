@@ -163,7 +163,7 @@ public class {{ name }}Mechanism {
   }
 
   public void sendGoal{{ kind|goal }}ToIO() {
-{%- if kind != "Flywheel"%}
+{%- if kind != "Flywheel" %}
     updateClampedGoal{{ kind|goal }}();
 
 {%- if kind == "Arm" %}
@@ -178,7 +178,7 @@ public class {{ name }}Mechanism {
     io.set{{ encoder|upperfirst }}GoalSpeed(goal{{ kind|goal }});
 {%- endif%}
   }
-{%- if kind != "Flywheel "%}
+{%- if kind != "Flywheel" %}
 
   /**
    * Based on the bounds previously set, clamp the last set goal {{ kind|goal|lowerfirst }} to be between the bounds.
