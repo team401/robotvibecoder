@@ -8,15 +8,16 @@ import static edu.wpi.first.units.Units.VoltsPerRadianPerSecondSquared;
 
 import coppercore.parameter_tools.LoggedTunableNumber;
 import coppercore.wpilib_interface.UnitUtils;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.MutAngle;
-import frc.robot.TestModeManager;
-import frc.robot.constants.JsonConstants;
+{%-if kind != "Flywheel" %}
+import edu.wpi.first.units.measure.{{ kind|pos_dimension }};
+import edu.wpi.first.units.measure.Mut{{ kind|pos_dimension }};
+{%- endif %}
+import edu.wpi.first.units.measure.{{ kind|vel_dimension }};
+import frc.robot.{{ package }}.{{ name }}IO.{{ name }}OutputMode;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * A Mechanism to keep track of the {{ name }}
+ * A Mechanism to manage the {{ name }}
  *
  * <ul>
  *   <li>Uses closed-loop TorqueCurrentFOC control
@@ -26,11 +27,13 @@ public class {{ name }}Mechanism {
   {{ name }}InputsAutoLogged inputs = new {{ name }}InputsAutoLogged();
   {{ name }}OutputsAutoLogged outputs = new {{ name }}OutputsAutoLogged();
 
-  MutAngle goalAngle = Rotations.mutable(0.0);
-  MutAngle clampedGoalAngle = Rotations.mutable(0.0);
+  Mut{{ kind|pos_dimension }} goal{{ kind|goal }} = Rotations.mutable(0.0);
+{%- if kind != "Flywheel" %}
+  Mut{{ kind|pos_dimension }} clampedGoal{{ kind|goal }} = Rotations.mutable(0.0);
+{%- endif %}
 
-  MutAngle minAngle = JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}MinMinAngle.mutableCopy();
-  MutAngle maxAngle = JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}MaxMaxAngle.mutableCopy();
+  Mut{{ kind|pos_dimension }} min{{ kind|pos_dimension }} = {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MinMin{{ kind|pos_dimension }}.mutableCopy();
+  Mut{{ kind|pos_dimension }} max{{ kind|pos_dimension }} = {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MaxMax{{ kind|pos_dimension }}.mutableCopy();
 
   LoggedTunableNumber {{ name|lowerfirst }}kP;
   LoggedTunableNumber {{ name|lowerfirst }}kI;
@@ -50,31 +53,31 @@ public class {{ name }}Mechanism {
 
   public {{ name }}Mechanism({{ name }}IO io) {
     {{ name|lowerfirst }}kP =
-        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kP", JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}KP);
+        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kP", {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KP);
     {{ name|lowerfirst }}kI =
-        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kI", JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}KI);
+        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kI", {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KI);
     {{ name|lowerfirst }}kD =
-        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kD", JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}KD);
+        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kD", {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KD);
 
     {{ name|lowerfirst }}kS =
-        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kS", JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}KS);
+        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kS", {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KS);
     {{ name|lowerfirst }}kV =
-        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kV", JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}KV);
+        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kV", {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KV);
     {{ name|lowerfirst }}kA =
-        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kA", JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}KA);
+        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kA", {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KA);
     {{ name|lowerfirst }}kG =
-        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kG", JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}KG);
+        new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}kG", {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KG);
 
     {{ name|lowerfirst }}CruiseVelocity =
         new LoggedTunableNumber(
             "{{ name }}Tunables/{{ name|lowerfirst }}CruiseVelocity",
-            JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}MotionMagicCruiseVelocityRotationsPerSecond);
+            {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}AngularCruiseVelocityRotationsPerSecond);
     {{ name|lowerfirst }}ExpokV =
         new LoggedTunableNumber(
-            "{{ name }}Tunables/{{ name|lowerfirst }}ExpokV", JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}MotionMagicExpo_kV);
+            "{{ name }}Tunables/{{ name|lowerfirst }}ExpokV", {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MotionMagicExpo_kV);
     {{ name|lowerfirst }}ExpokA =
         new LoggedTunableNumber(
-            "{{ name }}Tunables/{{ name|lowerfirst }}ExpokA", JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}MotionMagicExpo_kA);
+            "{{ name }}Tunables/{{ name|lowerfirst }}ExpokA", {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MotionMagicExpo_kA);
 
     {{ name|lowerfirst }}TuningSetpointRotations =
         new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}TuningSetpointRotations", 0.0);
@@ -90,7 +93,7 @@ public class {{ name }}Mechanism {
    * <p>Does NOT run automatically! Must be called by the subsystem
    */
   public void periodic() {
-    sendGoalAngleToIO();
+    sendGoal{{ kind|goal }}ToIO();
 
     io.updateInputs(inputs);
     io.applyOutputs(outputs);
@@ -105,9 +108,10 @@ public class {{ name }}Mechanism {
 
   /** This method must be called from the subsystem's test periodic! */
   public void testPeriodic() {
-    switch (TestModeManager.getTestMode()) {
-      case {{ name }}ClosedLoopTuning:
-        io.setOverrideMode(false);
+    if (false) { // TODO: Replace placeholder test if {{ name }}Tuning mode is active
+      // switch (TestModeManager.getTestMode()) {
+      // case {{ name }}ClosedLoopTuning:
+        io.setOutputMode({{ name }}OutputMode.ClosedLoop);
         LoggedTunableNumber.ifChanged(
             hashCode(),
             (pid) -> {
@@ -138,138 +142,154 @@ public class {{ name }}Mechanism {
             {{ name|lowerfirst }}ExpokA,
             {{ name|lowerfirst }}ExpokV);
 
-      case SetpointTuning:
-        // Allow setpointing in {{ name }}ClosedLoopTuning and SetpointTuning
         LoggedTunableNumber.ifChanged(
             hashCode(),
             (setpoint) -> {
-              setGoalAngle(Rotations.of(setpoint[0]));
+              setGoal{{ kind|pos_dimension }}(Rotations.of(setpoint[0]));
             },
             {{ name|lowerfirst }}TuningSetpointRotations);
-        break;
-      case {{ name }}VoltageTuning:
-        LoggedTunableNumber.ifChanged(
+      /*  case {{ name }}VoltageTuning:
+          LoggedTunableNumber.ifChanged(
             hashCode(),
             (setpoint) -> {
               io.setOverrideVoltage(Volts.of(setpoint[0]));
             },
             {{ name|lowerfirst }}TuningOverrideVolts);
-        io.setOverrideMode(true);
-        break;
-      default:
-        break;
+          io.setOverrideMode(true);
+          break;
+        }
+        */
     }
   }
 
-  public void sendGoalAngleToIO() {
-    updateClampedGoalAngle();
+  public void sendGoal{{ kind|goal }}ToIO() {
+{%- if kind != "Flywheel"%}
+    updateClampedGoal{{ kind|goal }}();
 
-    io.set{{ name }}GoalPos(clampedGoalAngle);
+{%- if kind == "Arm" %}
+    io.set{{ encoder|upperfirst }}GoalPos(clampedGoal{{ kind|goal }});
+{%- elif kind == "Elevator" %}
+    // Convert goal height to encoder rotations
+    Angle {{ encoder }}GoalAngle = {{ name|lowerfirst }}HeightTo{{ encoder|upperfirst }}Angle(clampedGoal{{ kind|goal }});
+
+    io.set {{ encoder|upperfirst }}GoalPos({{ encoder }}GoalAngle);
+{%- endif %}
+{%- else %}
+    io.set{{ encoder|upperfirst }}GoalSpeed(goal{{ kind|goal }});
+{%- endif%}
   }
+{%- if kind != "Flywheel "%}
 
   /**
-   * Based on the bounds previously set, clamp the last set goal height to be between the bounds.
+   * Based on the bounds previously set, clamp the last set goal {{ kind|goal|lowerfirst }} to be between the bounds.
    *
    * <p>If the goal height is outside of the bounds and the bounds are expanded, this function will
    * still behave as expected, as the mechanism remembers its unclamped goal height and will attempt
    * to get there once it is allowed.
    */
-  private void updateClampedGoalAngle() {
-    clampedGoalAngle.mut_replace(UnitUtils.clampMeasure(goalAngle, minAngle, maxAngle));
+  private void updateClampedGoal{{ kind|goal }}() {
+    clampedGoal{{ kind|goal }}.mut_replace(UnitUtils.clampMeasure(goal{{ kind|pos_dimension }}, min{{ kind|pos_dimension }}, max{{ kind|pos_dimension }}));
 
-    Logger.recordOutput("{{ name }}/clampedGoalAngle", clampedGoalAngle);
+    Logger.recordOutput("{{ name }}/clampedGoal{{ kind|goal }}", clampedGoal{{ kind|goal }});
   }
+{%- endif %}
 
   /**
    * Set the goal angle the {{ name|lowerfirst }} will to control about.
    *
    * <p>This goal angle will be clamped by the allowed range of motion
    *
-   * @param goalAngle The new goal angle
+   * @param goal{{ kind|pos_dimension }} The new goal angle
    */
-  public void setGoalAngle(Angle goalAngle) {
-    this.goalAngle.mut_replace(goalAngle);
+  public void setGoal{{ kind|pos_dimension }}({{ kind|pos_dimension }} goal{{ kind|pos_dimension }}) {
+    this.goal{{ kind|pos_dimension }}.mut_replace(goal{{ kind|pos_dimension }});
 
-    Logger.recordOutput("{{ name }}/goalAngle", goalAngle);
+    Logger.recordOutput("{{ name }}/goal{{ kind|pos_dimension }}", goal{{ kind|pos_dimension }});
   }
 
+{%- if kind != "Flywheel" %}
   /**
-   * Sets the minimum and maximum allowed angles that the {{ name|lowerfirst }} may target.
+   * Sets the minimum and maximum allowed {{ kind|goal|lowerfirst }}s that the {{ name|lowerfirst }} may target.
    *
-   * <p>When not in override mode, the goal angle of the {{ name|lowerfirst }} will be clamped to be between these
-   * values before it is sent to the IO. When these clamps change, the original goal angle is
+   * <p>When not in override mode, the goal {{ kind|goal|lowerfirst }} of the {{ name|lowerfirst }} will be clamped to be between these
+   * values before it is sent to the IO. When these clamps change, the original goal {{ kind|goal|lowerfirst }} is
    * clamped to be within the new bounds.
    *
-   * @param minAngle The minimum angle, which will be clamped between {{ name|lowerfirst }}MinMinAngle and
-   *     {{ name|lowerfirst }}MaxMaxAngle before being applied
-   * @param maxAngle The maximum angle, which will be clamped between {{ name|lowerfirst }}MinMinAngle and
-   *     {{ name|lowerfirst }}MaxMaxAngle before being applied
+   * @param min{{ kind|goal }} The minimum angle, which will be clamped between {{ name|lowerfirst }}MinMin{{ kind|pos_dimension }} and
+   *     {{ name|lowerfirst }}MaxMax{{ kind|pos_dimension }} before being applied
+   * @param max{{ kind|goal }} The maximum angle, which will be clamped between {{ name|lowerfirst }}MinMin{{ kind|pos_dimension }} and
+   *     {{ name|lowerfirst }}MaxMax{{ kind|pos_dimension }} before being applied
    */
-  public void setAllowedRangeOfMotion(Angle minAngle, Angle maxAngle) {
-    setMinAngle(minAngle);
-    setMaxAngle(maxAngle);
+  public void setAllowedRangeOfMotion({{ kind|pos_dimension }} min{{ kind|goal }}, {{ kind|pos_dimension }} max{{ kind|goal }}) {
+    setMin{{ kind|goal }}(min{{ kind|pos_dimension }});
+    setMax{{ kind|goal }}(max{{ kind|pos_dimension }});
   }
 
   /**
    * Sets the minimum allowed angle that the {{ name|lowerfirst }} may target.
    *
-   * <p>When not in override mode, the goal angle of the {{ name|lowerfirst }} will be clamped to be between these
-   * values before it is sent to the IO. When these clamps change, the original goal angle is
+   * <p>When not in override mode, the goal {{ kind|goal|lowerfirst }} of the {{ name|lowerfirst }} will be clamped to be between these
+   * values before it is sent to the IO. When these clamps change, the original goal {{ kind|goal|lowerfirst }} is
    * clamped to be within the new bounds.
    *
-   * @param minAngle The minimum angle, which will be clamped between {{ name|lowerfirst }}MinMinAngle and
-   *     {{ name|lowerfirst }}MaxMaxAngle before being applied
+   * @param min{{ kind|goal }} The minimum angle, which will be clamped between {{ name|lowerfirst }}MinMin{{ kind|goal }} and
+   *     {{ name|lowerfirst }}MaxMax{{ kind|goal }} before being applied
    */
-  public void setMinAngle(Angle minAngle) {
-    this.minAngle.mut_replace(
+  public void setMin{{ kind|goal }}({{ kind|pos_dimension }} min{{ kind|goal }}) {
+    this.min{{ kind|pos_dimension }}.mut_replace(
         UnitUtils.clampMeasure(
-            minAngle,
-            JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}MinMinAngle,
-            JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}MaxMaxAngle));
+            min{{ kind|pos_dimension }},
+            {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MinMin{{ kind|goal }},
+            {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MaxMax{{ kind|goal }}));
 
-    Logger.recordOutput("{{ name }}/minAngle", minAngle);
+    Logger.recordOutput("{{ name }}/min{{ kind|goal }}", min{{ kind|goal }});
   }
 
   /**
    * Sets the maximum allowed angle that the {{ name|lowerfirst }} may target.
    *
-   * <p>When not in override mode, the goal angle of the {{ name|lowerfirst }} will be clamped to be between these
+   * <p>When not in override mode, the goal {{ kind|goal|lowerfirst }} of the {{ name|lowerfirst }} will be clamped to be between these
    * values before it is sent to the IO. When these clamps change, the original goal angle is
    * clamped to be within the new bounds.
    *
-   * @param maxAngle The maximum angle, which will be clamped between {{ name|lowerfirst }}MinMinAngle and
-   *     {{ name|lowerfirst }}MaxMaxAngle before being applied
+   * @param max{{ kind|goal }} The maximum angle, which will be clamped between {{ name|lowerfirst }}MinMin{{ kind|goal }} and
+   *     {{ name|lowerfirst }}MaxMax{{ kind|goal }} before being applied
    */
-  public void setMaxAngle(Angle maxAngle) {
-    this.maxAngle.mut_replace(
+  public void setMax{{ kind|goal }}({{ kind|pos_dimension }} max{{ kind|goal }}) {
+    this.max{{ kind|goal }}.mut_replace(
         UnitUtils.clampMeasure(
-            maxAngle,
-            JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}MaxMaxAngle,
-            JsonConstants.{{ name|lowerfirst }}Constants.{{ name|lowerfirst }}MaxMaxAngle));
+            max{{ kind|goal }},
+            {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MaxMax{{ kind|goal }},
+            {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MaxMax{{ kind|goal }}));
 
-    Logger.recordOutput("{{ name }}/maxAngle", maxAngle);
+    Logger.recordOutput("{{ name }}/max{{ kind|goal }}", max{{ kind|goal }});
   }
 
   /**
-   * Get the current angle of the {{ name|lowerfirst }}
+   * Get the current {{ kind|goal|lowerfirst }} of the {{ name|lowerfirst }}
    *
    * @return
    */
-  public Angle get{{ name }}Angle() {
-    return inputs.{{ name|lowerfirst }}Position;
+  public {{ kind|pos_dimension }} get{{ name }}{{ kind|goal }}() {
+{%- if kind == "Arm" %}
+    return inputs.{{ encoder }}Pos;
+{%- elif kind == "Elevator "%}
+    return {{ encoder }}AngleTo{{ name }}Height(inputs.{{ encoder }}Pos);
+{%- endif%}
   }
+{%- endif %}
 
   /**
-   * Get the current angular velocity of the {{ name|lowerfirst }}
+   * Get the current velocity of the {{ name|lowerfirst }}
    *
    * @return The current velocity of the {{ name|lowerfirst }}, according to the {{ encoder }}
    */
-  public AngularVelocity get{{ name }}Velocity() {
-    return inputs.{{ name|lowerfirst }}Velocity;
+  public {{ kind|vel_dimension }} get{{ name }}Velocity() {
+    return inputs.{{ encoder }}Vel;
   }
 
   /**
-   * Check whether or not the {{ encoder}} is currently connected.
+   * Check whether or not the {{ encoder }} is currently connected.
    *
    * <p>"Connected" means that last time the position and velocity status signals were refreshed, the status code
    * was OK
@@ -277,7 +297,7 @@ public class {{ name }}Mechanism {
    * @return True if connected, false if disconnected
    */
   public boolean is{{ encoder|upperfirst }}Connected() {
-    return inputs.is{{ encoder|upperfirst }}Connected;
+    return inputs.{{ encoder }}Connected;
   }
 
   /**
@@ -296,8 +316,30 @@ public class {{ name }}Mechanism {
     io.setMotorsDisabled(disabled);
   }
 
-  /** Get the current unclamped angle of the {{ name|lowerfirst }} */
-  public Angle get{{ name }}GoalAngle() {
-    return goalAngle;
+  /** Get the current{%if kind != "Flywheel"%} unclamped{% endif %} goal {{ kind|goal|lowerfirst }} of the {{ name|lowerfirst }} */
+  public {{ kind|goal_dimension }} get{{ name }}Goal{{ kind|goal }}() {
+    return goal{{ kind|goal }};
   }
+{%- if kind == "Elevator" %}
+
+  /**
+   * Convert an angle of the {{ encoder }} into {{ name }} height
+   *
+   * @param {{ encoder }}Angle The encoder angle to convert
+   * @return How much the {{ name }} would move if the {{ encoder }} were rotated by {{ encoder }}Angle
+   */
+  public Distance {{ encoder }}AngleTo{{ name }}Height(Angle {{ encoder }}Angle) {
+    return Meters.of({{ encoder }}Angle.in(Rotations) * {{ name|lowerfirst }}HeightPer{{ encoder|upperfirst }}RotationMeters);
+  }
+
+  /**
+   * Convert {{ name }} height into {{ encoder }} angle
+   *
+   * @param {{ name }}Height The distance of the {{ name }} to convert
+   * @return How much the {{ encoder }} would rotate if the {{ name }} were moved by {{ name }}Height
+   */
+   public Angle {{ name|lowerfirst }}HeightTo{{ encoder|upperfirst }}Angle(Distance {{ name|lowerfirst }}Height) {
+    return Rotations.of({{ name|lowerfirst }}Height.in(Meters) / {{ name|lowerfirst }}HeightPer{{ encoder|upperfirst }}RotationMeters);
+   }
+{%- endif%}
 }

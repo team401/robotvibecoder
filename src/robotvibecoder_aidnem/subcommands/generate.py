@@ -38,10 +38,11 @@ def generate(args: Namespace) -> None:
             "Mechanism kinds beside Arm are not implemented yet :("
         )
 
-    file_templates: dict[str, str] = {
-        "{name}IO.java.j2": "{name}IO.java",
-        "{name}IOTalonFX.java.j2": "{name}IOTalonFX.java",
-        "{name}Constants.java.j2": "{name}Constants.java",
+    template_to_output_map: dict[str, str] = {
+        "Mechanism.java.j2": "{name}Mechanism.java",
+        "MechanismIO.java.j2": "{name}IO.java",
+        "MechanismIOTalonFX.java.j2": "{name}IOTalonFX.java",
+        "MechanismConstants.java.j2": "{name}Constants.java",
         config.kind + "Sim.java.j2": "{name}IOSim.java",
     }
 
@@ -49,9 +50,10 @@ def generate(args: Namespace) -> None:
         print(
             f"{constants.Colors.fg_red}{constants.Colors.bold}WARNING{constants.Colors.reset}: This will create/overwrite files at the following paths:"
         )
-        for file_template in file_templates:
+        for file_template in template_to_output_map:
             output_path = os.path.join(
-                args.folder, file_templates[file_template].format(name=config.name)
+                args.folder,
+                template_to_output_map[file_template].format(name=config.name),
             )
             print(f"  {output_path}")
         try:
@@ -61,9 +63,9 @@ def generate(args: Namespace) -> None:
             sys.exit(0)
 
     print("Templating files:")
-    for file_template in file_templates:
+    for file_template in template_to_output_map:
         output_path = os.path.join(
-            args.folder, file_templates[file_template].format(name=config.name)
+            args.folder, template_to_output_map[file_template].format(name=config.name)
         )
 
         if os.path.exists(output_path) and args.stdin:
@@ -74,7 +76,7 @@ def generate(args: Namespace) -> None:
             sys.exit(1)
 
         print(f"{constants.Colors.fg_cyan}➜{constants.Colors.reset} {output_path}")
-        template_path = file_template.format(name="Mechanism")
+        template_path = file_template
         template = env.get_template(template_path)
 
         output: str = template.render(config.__dict__)

@@ -50,14 +50,14 @@ public final class WristConstants {
   @JSONExclude
   public final double rotorToWristEncoderRatio = 1.0; // TODO: Replace placeholder value
 
-  public final Double wristkP = 0.0;
-  public final Double wristkI = 0.0;
-  public final Double wristkD = 0.0;
+  public final Double wristKP = 0.0;
+  public final Double wristKI = 0.0;
+  public final Double wristKD = 0.0;
 
-  public final Double wristkS = 0.0;
-  public final Double wristkV = 0.0;
-  public final Double wristkA = 0.0;
-  public final Double wristkG = 0.0;
+  public final Double wristKS = 0.0;
+  public final Double wristKV = 0.0;
+  public final Double wristKA = 0.0;
+  public final Double wristKG = 0.0;
 
   /** This is a Double until coppercore JSONSync supports RotationsPerSecond */
   public final Double wristAngularCruiseVelocityRotationsPerSecond = 1.0;
@@ -79,7 +79,8 @@ public final class WristConstants {
   public final Current wristStatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
 
   public final Double wristReduction = 1.0; // TODO: Replace placeholder reduction
-
+  public final Angle wristMinMinAngle = Rotations.of(0.0); // TODO: Replace placeholder constraints
+  public final Angle wristMaxMaxAngle = Rotations.of(1.0);
   public static final class Sim {
     @JSONExclude
     public static final JSONSync<WristConstants.Sim> synced =

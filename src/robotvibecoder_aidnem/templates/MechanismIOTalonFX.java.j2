@@ -124,21 +124,21 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
             .withSlot0(
                 new Slot0Configs()
                     .withGravityType(GravityTypeValue.{% if kind == "Arm" %}Arm_Cosine{% else %}Elevator_Static{% endif %})
-                    .withKS({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kS)
-                    .withKV({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kV)
-                    .withKA({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kA)
-                    .withKG({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kG)
-                    .withKP({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kP)
-                    .withKI({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kI)
-                    .withKD({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}kD))
+                    .withKS({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KS)
+                    .withKV({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KV)
+                    .withKA({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KA)
+                    .withKG({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KG)
+                    .withKP({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KP)
+                    .withKI({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KI)
+                    .withKD({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}KD))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(
                         {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}AngularCruiseVelocityRotationsPerSecond)
                     .withMotionMagicExpo_kA(
-                        {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Expo_kA_raw)
+                        {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MotionMagicExpo_kA)
                     .withMotionMagicExpo_kV(
-                        {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Expo_kV_raw));
+                        {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MotionMagicExpo_kV));
 
     // Apply talonFX config to motor{{ motors|plural }}
     {%- for motor in motors %}
