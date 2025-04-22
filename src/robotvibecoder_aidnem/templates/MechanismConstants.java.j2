@@ -4,6 +4,9 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+{%- if kind != "Flywheel" and kind|pos_unit != "Meters" %}
+import static edu.wpi.first.units.Units.{{ kind|pos_unit }};
+{%- endif %}
 
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import coppercore.parameter_tools.json.JSONExclude;
@@ -57,14 +60,14 @@ public final class {{ name }}Constants {
   @JSONExclude
   public final double rotorTo{{ encoder|upperfirst }}Ratio = 1.0; // TODO: Replace placeholder value
 
-  public final Double {{ name|lowerfirst }}kP = 0.0;
-  public final Double {{ name|lowerfirst }}kI = 0.0;
-  public final Double {{ name|lowerfirst }}kD = 0.0;
+  public final Double {{ name|lowerfirst }}KP = 0.0;
+  public final Double {{ name|lowerfirst }}KI = 0.0;
+  public final Double {{ name|lowerfirst }}KD = 0.0;
 
-  public final Double {{ name|lowerfirst }}kS = 0.0;
-  public final Double {{ name|lowerfirst }}kV = 0.0;
-  public final Double {{ name|lowerfirst }}kA = 0.0;
-  public final Double {{ name|lowerfirst }}kG = 0.0;
+  public final Double {{ name|lowerfirst }}KS = 0.0;
+  public final Double {{ name|lowerfirst }}KV = 0.0;
+  public final Double {{ name|lowerfirst }}KA = 0.0;
+  public final Double {{ name|lowerfirst }}KG = 0.0;
 
   /** This is a Double until coppercore JSONSync supports RotationsPerSecond */
   public final Double {{ name|lowerfirst }}AngularCruiseVelocityRotationsPerSecond = 1.0;
@@ -76,17 +79,22 @@ public final class {{ name }}Constants {
    * kV results in the maximum velocity of the system. Therefore, a higher profile kV results in a
    * lower profile velocity.
   */
-  public final Double {{ name|lowerfirst }}Expo_kV_raw = 0.0;
+  public final Double {{ name|lowerfirst }}MotionMagicExpo_kV = 0.0;
 
   /*
    * The Motion Magic Expo kA, measured in Volts per Radian per Second Squared, but represented as a double so it can be synced by JSONSync
   */
-  public final Double {{ name|lowerfirst }}Expo_kA_raw = 0.0;
+  public final Double {{ name|lowerfirst }}MotionMagicExpo_kA = 0.0;
 
   public final Current {{ name|lowerfirst }}StatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
 
   public final Double {{ name|lowerfirst }}Reduction = 1.0; // TODO: Replace placeholder reduction
 
+{%- if kind != "Flywheel" %}
+  public final {{ kind|pos_dimension }} {{ name|lowerfirst }}MinMin{{ kind|goal }} = {{ kind|pos_unit }}.of(0.0); // TODO: Replace placeholder constraints
+  public final {{ kind|pos_dimension }} {{ name|lowerfirst }}MaxMax{{ kind|goal }} = {{ kind|pos_unit }}.of(1.0);
+
+{%- endif %}
   public static final class Sim {
     @JSONExclude
     public static final JSONSync<{{ name }}Constants.Sim> synced =

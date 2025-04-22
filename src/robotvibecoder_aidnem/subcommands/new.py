@@ -28,7 +28,7 @@ def new_config_interactive() -> MechanismConfig:
         kind = input("> ")
         if kind not in MechanismKind:
             print("Please input either Elevator, Arm, or Flywheel.")
-    kind_enum: MechanismKind = kind
+    kind_enum: MechanismKind = MechanismKind[kind]
 
     print("CAN Bus: whatever the name of the mechanism's bus is (e.g. `canivore`)")
     canbus: str = input("> ")
