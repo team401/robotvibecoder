@@ -172,7 +172,7 @@ public class {{ name }}Mechanism {
     // Convert goal height to encoder rotations
     Angle {{ encoder }}GoalAngle = {{ name|lowerfirst }}HeightTo{{ encoder|upperfirst }}Angle(clampedGoal{{ kind|goal }});
 
-    io.set {{ encoder|upperfirst }}GoalPos({{ encoder }}GoalAngle);
+    io.set{{ encoder|upperfirst }}GoalPos({{ encoder }}GoalAngle);
 {%- endif %}
 {%- else %}
     io.set{{ encoder|upperfirst }}GoalSpeed(goal{{ kind|goal }});
@@ -273,7 +273,7 @@ public class {{ name }}Mechanism {
   public {{ kind|pos_dimension }} get{{ name }}{{ kind|goal }}() {
 {%- if kind == "Arm" %}
     return inputs.{{ encoder }}Pos;
-{%- elif kind == "Elevator "%}
+{%- elif kind == "Elevator" %}
     return {{ encoder }}AngleTo{{ name }}Height(inputs.{{ encoder }}Pos);
 {%- endif%}
   }
@@ -329,7 +329,7 @@ public class {{ name }}Mechanism {
    * @return How much the {{ name }} would move if the {{ encoder }} were rotated by {{ encoder }}Angle
    */
   public Distance {{ encoder }}AngleTo{{ name }}Height(Angle {{ encoder }}Angle) {
-    return Meters.of({{ encoder }}Angle.in(Rotations) * {{ name|lowerfirst }}HeightPer{{ encoder|upperfirst }}RotationMeters);
+    return Meters.of({{ encoder }}Angle.in(Rotations) * {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}HeightPer{{ encoder|upperfirst }}RotationMeters);
   }
 
   /**
@@ -339,7 +339,7 @@ public class {{ name }}Mechanism {
    * @return How much the {{ encoder }} would rotate if the {{ name }} were moved by {{ name }}Height
    */
    public Angle {{ name|lowerfirst }}HeightTo{{ encoder|upperfirst }}Angle(Distance {{ name|lowerfirst }}Height) {
-    return Rotations.of({{ name|lowerfirst }}Height.in(Meters) / {{ name|lowerfirst }}HeightPer{{ encoder|upperfirst }}RotationMeters);
+    return Rotations.of({{ name|lowerfirst }}Height.in(Meters) / {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}HeightPer{{ encoder|upperfirst }}RotationMeters);
    }
 {%- endif%}
 }

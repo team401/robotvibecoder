@@ -119,6 +119,10 @@ public final class {{ name }}Constants {
     public final Angle {{ name|lowerfirst }}MaxAngle = Radians.of(1.0);
 
     public final Angle {{ name|lowerfirst }}StartingAngle = Radians.of(0.0);
+{%- elif kind == "Elevator" %}
+    public final Mass carriageMass = Kilograms.of(5.0);
+    public final Distance drumRadius = Meters.of(0.05);
+    public final Distance {{ name|lowerfirst }}StartingHeight = Meters.of(0.0);
 {%- endif %}
   }
 }

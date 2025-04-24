@@ -33,10 +33,8 @@ def generate(args: Namespace) -> None:
 
     env = generate_env()
 
-    if config.kind != MechanismKind.Arm:
-        raise NotImplementedError(
-            "Mechanism kinds beside Arm are not implemented yet :("
-        )
+    if config.kind == MechanismKind.Flywheel:
+        raise NotImplementedError("Flywheel Mechanisms are not implemented yet :(")
 
     template_to_output_map: dict[str, str] = {
         "Mechanism.java.j2": "{name}Mechanism.java",
