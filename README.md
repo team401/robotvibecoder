@@ -28,7 +28,7 @@ Here's a quick guide on usage; in-depth docs can be found in the `docs/` folder
 
 1. Create a config:
 
-A config specifies the name of the mechanism, it's java package, and the name of its motors and encoder. A config can be generated interactively with:
+A config specifies the name of the mechanism, its java package, and the name of its motors and encoder. A config can be generated interactively with:
 
 ```sh
 robotvibecoder new -i config.json
