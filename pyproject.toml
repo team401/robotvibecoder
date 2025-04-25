@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "robotvibecoder-aidnem"
+name = "robotvibecoder"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
@@ -29,9 +29,9 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/aidnem/robotvibecoder-aidnem#readme"
-Issues = "https://github.com/aidnem/robotvibecoder-aidnem/issues"
-Source = "https://github.com/aidnem/robotvibecoder-aidnem"
+Documentation = "https://github.com/aidnem/robotvibecoder#readme"
+Issues = "https://github.com/aidnem/robotvibecoder/issues"
+Source = "https://github.com/aidnem/robotvibecoder"
 
 [project.scripts]
 robotvibecoder = "robotvibecoder_aidnem.main:main"
@@ -55,8 +55,8 @@ omit = [
 ]
 
 [tool.coverage.paths]
-robotvibecoder_aidnem = ["src/robotvibecoder_aidnem", "*/robotvibecoder-aidnem/src/robotvibecoder_aidnem"]
-tests = ["tests", "*/robotvibecoder-aidnem/tests"]
+robotvibecoder_aidnem = ["src/robotvibecoder_aidnem", "*/robotvibecoder/src/robotvibecoder_aidnem"]
+tests = ["tests", "*/robotvibecoder/tests"]
 
 [tool.coverage.report]
 exclude_lines = [

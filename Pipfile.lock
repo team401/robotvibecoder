@@ -139,7 +139,7 @@
             "markers": "python_version >= '3.5'",
             "version": "==1.0.0"
         },
-        "robotvibecoder-aidnem": {
+        "robotvibecoder": {
             "editable": true,
             "file": "."
         },

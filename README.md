@@ -43,4 +43,4 @@ robotvibecoder generate --config config.json
 
 ## License
 
-`robotvibecoder-aidnem` is distributed under the terms of the [GPL-3.0-only](https://spdx.org/licenses/GPL-3.0-only.html) license.
+`robotvibecoder` is distributed under the terms of the [GPL-3.0-only](https://spdx.org/licenses/GPL-3.0-only.html) license.
