@@ -9,17 +9,18 @@ Automatically generate code stubs for mechanisms in FRC Robot Code. This project
 - [robotvibecoder](#robotvibecoder)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
+  - [Quickstart](#quickstart)
   - [License](#license)
 
 ## Installation
 
-This project isn't done enough to be published, so just install it locally:
+RobotVibeCoder is hosted on PyPI: [robotvibecoder](https://pypi.org/project/robotvibecoder/). It can be installed with pip:
 
 ```console
-git clone https://github.com/aidnem/robotvibecoder
-cd robotvibecoder
-pip install -e .
+pip install robotvibecoder
 ```
+
+As long as your PATH includes your python scripts folder, this will add the CLI to path and you will be able to run it as `robotvibecoder` from a command prompt/terminal.
 
 ## Quickstart
 
@@ -35,7 +36,7 @@ robotvibecoder new -i config.json
 
 2. Generate a mechanism using that config:
 
-After the config has been editted to your satisfaction, generate Java IO code from that config:
+After the config has been edited to your satisfaction, generate Java IO code from that config:
 
 ```sh
 robotvibecoder generate --config config.json
