@@ -7,8 +7,8 @@ import json
 import os
 import sys
 
-from robotvibecoder_aidnem import constants
-from robotvibecoder_aidnem.config import MechanismConfig, MechanismKind
+from robotvibecoder import constants
+from robotvibecoder.config import MechanismConfig, MechanismKind
 
 
 def new_config_interactive() -> MechanismConfig:

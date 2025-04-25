@@ -1,11 +1,11 @@
 import argparse
 import sys
 from sys import argv
-from robotvibecoder_aidnem import constants
-from robotvibecoder_aidnem.config import load_json_config
-from robotvibecoder_aidnem.templating import generate_env
-from robotvibecoder_aidnem.subcommands.new import new
-from robotvibecoder_aidnem.subcommands.generate import generate
+from robotvibecoder import constants
+from robotvibecoder.config import load_json_config
+from robotvibecoder.templating import generate_env
+from robotvibecoder.subcommands.new import new
+from robotvibecoder.subcommands.generate import generate
 
 
 def main() -> None:
