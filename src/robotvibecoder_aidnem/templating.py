@@ -122,7 +122,7 @@ def goal_dimension(kind: str) -> str:
     if kind == "Arm":
         return "Angle"
     elif kind == "Elevator":
-        return "Height"
+        return "Distance"
     else:
         return "AngularVelocity"
 

@@ -45,6 +45,8 @@ public interface ElevatorIO {
     public MutCurrent followerMotorSupplyCurrent = Amps.mutable(0.0);
     
 
+    public boolean elevatorEncoderConnected = false;
+
     /** Current position of the elevatorEncoder. This measures total rotation since power on, not absolute position */
     public MutAngle elevatorEncoderPos = Rotations.mutable(0.0);
 
@@ -73,7 +75,7 @@ public interface ElevatorIO {
     /** Are the motors currently disabled in software? */
     public boolean motorsDisabled = false;
 
-    /** The current output mode of the elevator */
+    /** The current output mode of the Elevator */
     public ElevatorOutputMode outputMode = ElevatorOutputMode.ClosedLoop;
 
     /** The voltage currently applied to the motors */
@@ -109,13 +111,13 @@ public interface ElevatorIO {
    * Set the goal position of elevatorEncoder which the Elevator will control to when it is not in
    * override mode
    */
-  public void setelevatorEncoderGoalPos(Angle goalPos);
+  public void setElevatorEncoderGoalPos(Angle goalPos);
 
   /**
    * Set the position of the elevatorEncoder. This position is separate from absolute position and
    * can track multiple rotations.
    */
-  public void setPosition(Angle newAngle);
+  public void setElevatorEncoderPosition(Angle newAngle);
 
   /**
    * Set the override voltage for the Elevator when in Voltage output mode
@@ -136,7 +138,7 @@ public interface ElevatorIO {
    */
   public void setOutputMode(ElevatorOutputMode mode);
 
-  /** Update PID gains for the elevator */
+  /** Update PID gains for the Elevator */
   public void setPID(double p, double i, double d);
 
   /** Set profile constraints to be sent to Motion Magic Expo */

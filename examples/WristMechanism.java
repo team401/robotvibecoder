@@ -1,6 +1,9 @@
 package frc.robot.subsystems.scoring;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.units.Units.VoltsPerRadianPerSecond;
@@ -11,8 +14,7 @@ import coppercore.wpilib_interface.UnitUtils;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import frc.robot.TestModeManager;
-import frc.robot.constants.JsonConstants;
+import frc.robot.subsystems.scoring.WristIO.WristOutputMode;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -29,8 +31,8 @@ public class WristMechanism {
   MutAngle goalAngle = Rotations.mutable(0.0);
   MutAngle clampedGoalAngle = Rotations.mutable(0.0);
 
-  MutAngle minAngle = JsonConstants.wristConstants.wristMinMinAngle.mutableCopy();
-  MutAngle maxAngle = JsonConstants.wristConstants.wristMaxMaxAngle.mutableCopy();
+  MutAngle minAngle = WristConstants.synced.getObject().wristMinMinAngle.mutableCopy();
+  MutAngle maxAngle = WristConstants.synced.getObject().wristMaxMaxAngle.mutableCopy();
 
   LoggedTunableNumber wristkP;
   LoggedTunableNumber wristkI;
@@ -50,31 +52,31 @@ public class WristMechanism {
 
   public WristMechanism(WristIO io) {
     wristkP =
-        new LoggedTunableNumber("WristTunables/wristkP", JsonConstants.wristConstants.wristKP);
+        new LoggedTunableNumber("WristTunables/wristkP", WristConstants.synced.getObject().wristKP);
     wristkI =
-        new LoggedTunableNumber("WristTunables/wristkI", JsonConstants.wristConstants.wristKI);
+        new LoggedTunableNumber("WristTunables/wristkI", WristConstants.synced.getObject().wristKI);
     wristkD =
-        new LoggedTunableNumber("WristTunables/wristkD", JsonConstants.wristConstants.wristKD);
+        new LoggedTunableNumber("WristTunables/wristkD", WristConstants.synced.getObject().wristKD);
 
     wristkS =
-        new LoggedTunableNumber("WristTunables/wristkS", JsonConstants.wristConstants.wristKS);
+        new LoggedTunableNumber("WristTunables/wristkS", WristConstants.synced.getObject().wristKS);
     wristkV =
-        new LoggedTunableNumber("WristTunables/wristkV", JsonConstants.wristConstants.wristKV);
+        new LoggedTunableNumber("WristTunables/wristkV", WristConstants.synced.getObject().wristKV);
     wristkA =
-        new LoggedTunableNumber("WristTunables/wristkA", JsonConstants.wristConstants.wristKA);
+        new LoggedTunableNumber("WristTunables/wristkA", WristConstants.synced.getObject().wristKA);
     wristkG =
-        new LoggedTunableNumber("WristTunables/wristkG", JsonConstants.wristConstants.wristKG);
+        new LoggedTunableNumber("WristTunables/wristkG", WristConstants.synced.getObject().wristKG);
 
     wristCruiseVelocity =
         new LoggedTunableNumber(
             "WristTunables/wristCruiseVelocity",
-            JsonConstants.wristConstants.wristMotionMagicCruiseVelocityRotationsPerSecond);
+            WristConstants.synced.getObject().wristAngularCruiseVelocityRotationsPerSecond);
     wristExpokV =
         new LoggedTunableNumber(
-            "WristTunables/wristExpokV", JsonConstants.wristConstants.wristMotionMagicExpo_kV);
+            "WristTunables/wristExpokV", WristConstants.synced.getObject().wristMotionMagicExpo_kV);
     wristExpokA =
         new LoggedTunableNumber(
-            "WristTunables/wristExpokA", JsonConstants.wristConstants.wristMotionMagicExpo_kA);
+            "WristTunables/wristExpokA", WristConstants.synced.getObject().wristMotionMagicExpo_kA);
 
     wristTuningSetpointRotations =
         new LoggedTunableNumber("WristTunables/wristTuningSetpointRotations", 0.0);
@@ -105,9 +107,10 @@ public class WristMechanism {
 
   /** This method must be called from the subsystem's test periodic! */
   public void testPeriodic() {
-    switch (TestModeManager.getTestMode()) {
-      case WristClosedLoopTuning:
-        io.setOverrideMode(false);
+    if (false) { // TODO: Replace placeholder test if WristTuning mode is active
+      // switch (TestModeManager.getTestMode()) {
+      // case WristClosedLoopTuning:
+        io.setOutputMode(WristOutputMode.ClosedLoop);
         LoggedTunableNumber.ifChanged(
             hashCode(),
             (pid) -> {
@@ -138,31 +141,29 @@ public class WristMechanism {
             wristExpokA,
             wristExpokV);
 
-      case SetpointTuning:
-        // Allow setpointing in WristClosedLoopTuning and SetpointTuning
         LoggedTunableNumber.ifChanged(
             hashCode(),
             (setpoint) -> {
               setGoalAngle(Rotations.of(setpoint[0]));
             },
             wristTuningSetpointRotations);
-        break;
-      case WristVoltageTuning:
-        LoggedTunableNumber.ifChanged(
+      /*  case WristVoltageTuning:
+          LoggedTunableNumber.ifChanged(
             hashCode(),
             (setpoint) -> {
               io.setOverrideVoltage(Volts.of(setpoint[0]));
             },
             wristTuningOverrideVolts);
-        io.setOverrideMode(true);
-        break;
-      default:
-        break;
+          io.setOverrideMode(true);
+          break;
+        }
+        */
     }
   }
 
   public void sendGoalAngleToIO() {
     updateClampedGoalAngle();
+    io.setWristEncoderGoalPos(clampedGoalAngle);
   }
 
   /**
@@ -179,7 +180,7 @@ public class WristMechanism {
   }
 
   /**
-   * Set the goal angle the wrist will to control about.
+   * Set the goal angle the wrist will to control to.
    *
    * <p>This goal angle will be clamped by the allowed range of motion
    *
@@ -221,8 +222,8 @@ public class WristMechanism {
     this.minAngle.mut_replace(
         UnitUtils.clampMeasure(
             minAngle,
-            JsonConstants.wristConstants.wristMinMinAngle,
-            JsonConstants.wristConstants.wristMaxMaxAngle));
+            WristConstants.synced.getObject().wristMinMinAngle,
+            WristConstants.synced.getObject().wristMaxMaxAngle));
 
     Logger.recordOutput("Wrist/minAngle", minAngle);
   }
@@ -241,8 +242,8 @@ public class WristMechanism {
     this.maxAngle.mut_replace(
         UnitUtils.clampMeasure(
             maxAngle,
-            JsonConstants.wristConstants.wristMaxMaxAngle,
-            JsonConstants.wristConstants.wristMaxMaxAngle));
+            WristConstants.synced.getObject().wristMaxMaxAngle,
+            WristConstants.synced.getObject().wristMaxMaxAngle));
 
     Logger.recordOutput("Wrist/maxAngle", maxAngle);
   }
@@ -294,7 +295,7 @@ public class WristMechanism {
   }
 
   /** Get the current unclamped goal angle of the wrist */
-  public Angle getWristGoalAngle() {
+  public Angle getGoalAngle() {
     return goalAngle;
   }
 }

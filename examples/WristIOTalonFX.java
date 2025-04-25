@@ -117,21 +117,21 @@ public class WristIOTalonFX implements WristIO {
             .withSlot0(
                 new Slot0Configs()
                     .withGravityType(GravityTypeValue.Arm_Cosine)
-                    .withKS(WristConstants.synced.getObject().wristkS)
-                    .withKV(WristConstants.synced.getObject().wristkV)
-                    .withKA(WristConstants.synced.getObject().wristkA)
-                    .withKG(WristConstants.synced.getObject().wristkG)
-                    .withKP(WristConstants.synced.getObject().wristkP)
-                    .withKI(WristConstants.synced.getObject().wristkI)
-                    .withKD(WristConstants.synced.getObject().wristkD))
+                    .withKS(WristConstants.synced.getObject().wristKS)
+                    .withKV(WristConstants.synced.getObject().wristKV)
+                    .withKA(WristConstants.synced.getObject().wristKA)
+                    .withKG(WristConstants.synced.getObject().wristKG)
+                    .withKP(WristConstants.synced.getObject().wristKP)
+                    .withKI(WristConstants.synced.getObject().wristKI)
+                    .withKD(WristConstants.synced.getObject().wristKD))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(
                         WristConstants.synced.getObject().wristAngularCruiseVelocityRotationsPerSecond)
                     .withMotionMagicExpo_kA(
-                        WristConstants.synced.getObject().wristExpo_kA_raw)
+                        WristConstants.synced.getObject().wristMotionMagicExpo_kA)
                     .withMotionMagicExpo_kV(
-                        WristConstants.synced.getObject().wristExpo_kV_raw));
+                        WristConstants.synced.getObject().wristMotionMagicExpo_kV));
 
     // Apply talonFX config to motor
     wristMotor.getConfigurator().apply(talonFXConfigs);
@@ -186,7 +186,8 @@ public class WristIOTalonFX implements WristIO {
               "wrist/referenceSlope",
               wristMotor.getClosedLoopReferenceSlope().getValueAsDouble());
           outputs.wristAppliedVolts.mut_replace(
-              Volts.of(wristMotor.getClosedLoopOutput().getValueAsDouble()));
+              wristMotor.getMotorVoltage().getValue());
+          outputs.wristClosedLoopOutput = wristMotor.getClosedLoopOutput().getValueAsDouble();
           outputs.pContrib.mut_replace(
               Volts.of(wristMotor.getClosedLoopProportionalOutput().getValueAsDouble()));
           outputs.iContrib.mut_replace(

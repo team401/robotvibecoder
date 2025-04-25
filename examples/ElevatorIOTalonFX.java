@@ -42,9 +42,9 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   Voltage overrideVoltage;
 
   ElevatorOutputMode outputMode = ElevatorOutputMode.ClosedLoop;
-  private TalonFX leadMotor;
+  TalonFX leadMotor;
   
-  private TalonFX followerMotor;
+  TalonFX followerMotor;
   
 
   CANcoder elevatorEncoder;
@@ -55,7 +55,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   boolean motorDisabled = false;
 
   private StatusSignal<Angle> elevatorEncoderPosition;
-  private StatusSignal<Angle> elevatorEncoderVelocity;
+  private StatusSignal<AngularVelocity> elevatorEncoderVelocity;
   private StatusSignal<Current> leadMotorSupplyCurrent;
   private StatusSignal<Current> leadMotorStatorCurrent;
 
@@ -73,8 +73,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
   public ElevatorIOTalonFX() {
     // Initialize TalonFXs  and CANcoders with their correct IDs
-    leadMotor = new TalonFX(ElevatorConstants.synced.getObject().leadMotorId, "canivore")
-    followerMotor = new TalonFX(ElevatorConstants.synced.getObject().followerMotorId, "canivore")
+    leadMotor = new TalonFX(ElevatorConstants.synced.getObject().leadMotorId, "canivore");
+    followerMotor = new TalonFX(ElevatorConstants.synced.getObject().followerMotorId, "canivore");
 
     elevatorEncoder =
         new CANcoder(ElevatorConstants.synced.getObject().elevatorEncoderID, "canivore");
@@ -86,11 +86,12 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     // Update with large CANcoder direction and apply
     cancoderConfiguration.MagnetSensor.SensorDirection =
         ElevatorConstants.synced.getObject().elevatorEncoderDirection;
-    cancoderConfiguration.MagnetSensor.MagnetOffset = ElevatorConstants.synced.getObject().elevatorEncoderMagnetOffset;
+    cancoderConfiguration.MagnetSensor.MagnetOffset = ElevatorConstants.synced.getObject().elevatorEncoderMagnetOffset.in(Rotations);
     elevatorEncoder.getConfigurator().apply(cancoderConfiguration);
 
     // Cache status signals and refresh them when used
     elevatorEncoderPosition = elevatorEncoder.getPosition();
+    elevatorEncoderVelocity = elevatorEncoder.getVelocity();
 
     leadMotorSupplyCurrent = leadMotor.getSupplyCurrent();
     leadMotorStatorCurrent = leadMotor.getStatorCurrent();
@@ -103,7 +104,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         leadMotorStatorCurrent,
         followerMotorSupplyCurrent,
         followerMotorStatorCurrent,
-        elevatorEncoderPosition
+        elevatorEncoderPosition,
+        elevatorEncoderVelocity
     );
 
     // Initialize talonFXConfigs to use FusedCANCoder and Motion Magic Expo and have correct PID
@@ -127,21 +129,21 @@ public class ElevatorIOTalonFX implements ElevatorIO {
             .withSlot0(
                 new Slot0Configs()
                     .withGravityType(GravityTypeValue.Elevator_Static)
-                    .withKS(ElevatorConstants.synced.getObject().elevatorkS)
-                    .withKV(ElevatorConstants.synced.getObject().elevatorkV)
-                    .withKA(ElevatorConstants.synced.getObject().elevatorkA)
-                    .withKG(ElevatorConstants.synced.getObject().elevatorkG)
-                    .withKP(ElevatorConstants.synced.getObject().elevatorkP)
-                    .withKI(ElevatorConstants.synced.getObject().elevatorkI)
-                    .withKD(ElevatorConstants.synced.getObject().elevatorkD))
+                    .withKS(ElevatorConstants.synced.getObject().elevatorKS)
+                    .withKV(ElevatorConstants.synced.getObject().elevatorKV)
+                    .withKA(ElevatorConstants.synced.getObject().elevatorKA)
+                    .withKG(ElevatorConstants.synced.getObject().elevatorKG)
+                    .withKP(ElevatorConstants.synced.getObject().elevatorKP)
+                    .withKI(ElevatorConstants.synced.getObject().elevatorKI)
+                    .withKD(ElevatorConstants.synced.getObject().elevatorKD))
             .withMotionMagic(
                 new MotionMagicConfigs()
                     .withMotionMagicCruiseVelocity(
                         ElevatorConstants.synced.getObject().elevatorAngularCruiseVelocityRotationsPerSecond)
                     .withMotionMagicExpo_kA(
-                        ElevatorConstants.synced.getObject().elevatorExpo_kA_raw)
+                        ElevatorConstants.synced.getObject().elevatorMotionMagicExpo_kA)
                     .withMotionMagicExpo_kV(
-                        ElevatorConstants.synced.getObject().elevatorExpo_kV_raw));
+                        ElevatorConstants.synced.getObject().elevatorMotionMagicExpo_kV));
 
     // Apply talonFX config to motors
     leadMotor.getConfigurator().apply(talonFXConfigs);
@@ -171,16 +173,18 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
     inputs.leadMotorSupplyCurrent.mut_replace(leadMotorSupplyCurrent.getValue());
     inputs.leadMotorStatorCurrent.mut_replace(leadMotorStatorCurrent.getValue());
+    inputs.leadMotorConnected = leadMotor.isConnected();
 
     inputs.followerMotorSupplyCurrent.mut_replace(followerMotorSupplyCurrent.getValue());
     inputs.followerMotorStatorCurrent.mut_replace(followerMotorStatorCurrent.getValue());
+    inputs.followerMotorConnected = followerMotor.isConnected();
 
     inputs.elevatorEncoderGoalPos.mut_replace(elevatorEncoderGoalAngle);
     inputs.elevatorEncoderSetpointPos.mut_replace(elevatorEncoderSetpointPosition);
 
     inputs.motionMagicError = leadMotor.getClosedLoopError().getValueAsDouble();
 
-    inputs.elevatorMechanismVelocity.mut_replace(elevatorEncoder.getVelocity().getValue());
+    inputs.elevatorVelocity.mut_replace(elevatorEncoder.getVelocity().getValue());
   }
 
   @Override
@@ -226,12 +230,12 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   }
 
   @Override
-  public void elevatorEncoderGoalPos(Angle goalPos) {
+  public void setElevatorEncoderGoalPos(Angle goalPos) {
     elevatorEncoderGoalAngle.mut_replace(goalPos);
   }
 
   @Override
-  public void setelevatorEncoderPosition(Angle newAngle) {
+  public void setElevatorEncoderPosition(Angle newAngle) {
     elevatorEncoder.setPosition(newAngle);
   }
 

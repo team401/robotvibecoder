@@ -1,0 +1,70 @@
+{% extends 'MechanismIOSim.java.j2' %}
+{%- block unit_imports %}
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+{% endblock %}
+{%- block sim_import %}
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+{%- endblock %}
+{%- block sim_declaration %}
+    private final ElevatorSim {{ name|lowerfirst }}Sim =
+      new ElevatorSim(
+          DCMotor.getKrakenX60Foc({{ motors|length }}),
+          {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Reduction,
+          {{ name }}Constants.Sim.synced.getObject().carriageMass.in(Kilograms),
+          {{ name }}Constants.Sim.synced.getObject().drumRadius.in(Meters),
+          {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MinMinHeight.in(Meters),
+          {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MaxMaxHeight.in(Meters),
+          true,
+          {{ name }}Constants.Sim.synced.getObject().{{ name|lowerfirst }}StartingHeight.in(Meters),
+          {{ name }}Constants.Sim.synced.getObject().positionStdDev,
+          {{ name }}Constants.Sim.synced.getObject().velocityStdDev);
+{%- endblock %}
+{%- block update_sim_state %}
+    // Alias that JSON constant here for easier reuse in this method
+    final double heightPerRotation = {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}HeightPer{{ encoder|upperfirst }}RotationMeters;
+
+    Distance {{ name|lowerfirst }}Height = Meters.of({{ name|lowerfirst }}Sim.getPositionMeters());
+    LinearVelocity {{ name|lowerfirst }}Velocity = MetersPerSecond.of({{ name|lowerfirst }}Sim.getVelocityMetersPerSecond());
+
+    Logger.recordOutput("{{ name|lowerfirst }}/sim{{ name }}HeightMeters", {{ name|lowerfirst }}Height.in(Meters));
+    Logger.recordOutput(
+        "{{ name|lowerfirst }}/sim{{ name }}VelocityMetersPerSec", {{ name|lowerfirst }}Velocity.in(MetersPerSecond));
+
+    Angle {{ encoder }}Angle = Rotations.of({{ name|lowerfirst }}Height.in(Meters) / heightPerRotation);
+
+    Angle motorAngle = {{ encoder }}Angle.times({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Reduction);
+
+    // Convert {{ name }} velocity (m/s) into angular velocity of {{ encoder }}
+    // by dividing by height per rotation: (m/s) / (m/rot) = rot/s
+    
+    AngularVelocity {{ encoder }}Velocity =
+        RotationsPerSecond.of(
+            {{ name|lowerfirst }}Velocity.in(MetersPerSecond)
+                / heightPerRotation);
+
+    // For motors, multiply encoder velocity by {{ name }} reduction, because the motors
+    // will spin [reduction] times as many times as spool.
+    // .times(ElevatorConstants.synced.getObject().elevatorReduction);
+    AngularVelocity motorVelocity =
+        {{ encoder }}Velocity.times({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Reduction);
+    // TODO: Find out if/why sim breaks when multiplying motor velocity by motor reduction
+
+    {{ encoder }}SimState.setRawPosition({{ encoder }}Angle);
+    {{ encoder }}SimState.setVelocity({{ encoder }}Velocity);
+{% for motor in motors %}
+    {{ motor }}SimState.setRawRotorPosition(motorAngle);
+    {{ motor }}SimState.setRotorVelocity(motorVelocity);
+    {{ motor }}SimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+{% endfor %}
+    {{ name|lowerfirst }}Sim.setInputVoltage({{ lead_motor }}SimState.getMotorVoltage());
+
+    {{ name|lowerfirst }}Sim.update(SimConstants.simDeltaTime.in(Seconds));
+{%- endblock %}
