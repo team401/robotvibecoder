@@ -1,6 +1,6 @@
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from robotvibecoder_aidnem import constants
+from robotvibecoder import constants
 
 
 def article(word: str) -> str:
@@ -129,7 +129,7 @@ def goal_dimension(kind: str) -> str:
 
 def generate_env() -> Environment:
     env = Environment(
-        loader=PackageLoader("robotvibecoder_aidnem"), autoescape=select_autoescape()
+        loader=PackageLoader("robotvibecoder"), autoescape=select_autoescape()
     )
 
     env.filters["article"] = article

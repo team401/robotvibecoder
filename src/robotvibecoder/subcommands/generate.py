@@ -1,15 +1,15 @@
 from argparse import Namespace
 import json
 import sys
-from robotvibecoder_aidnem import constants
-from robotvibecoder_aidnem.config import (
+from robotvibecoder import constants
+from robotvibecoder.config import (
     MechanismConfig,
     MechanismKind,
     generate_config_from_data,
     load_json_config,
     validate_config,
 )
-from robotvibecoder_aidnem.templating import generate_env
+from robotvibecoder.templating import generate_env
 import os
 
 
