@@ -8,6 +8,7 @@ Here's an example config:
 {
   "package": "subsystems.scoring",
   "name": "Elevator",
+  "kind": "Elevator",
   "motors": ["leadMotor", "followerMotor"],
   "lead_motor": "leadMotor",
   "encoder": "elevatorEncoder"
@@ -67,10 +68,11 @@ This process would produce the following JSON config:
 ```json
 {
   "package": "subsystems.example",
-  "name": "ExampleArm",
-  "motors": ["bottomLeft", "bottomRight", "topLeft", "topRight"],
-  "lead_motor": "topLeft",
-  "encoder": "exampleArmEncoder"
+  "name": "Elevator",
+  "kind": "Elevator",
+  "motors": ["leadMotor", "followerMotor"],
+  "lead_motor": "leadMotor",
+  "encoder": "elevatorEncoder"
 }
 ```
 
