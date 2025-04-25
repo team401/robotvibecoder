@@ -1,7 +1,7 @@
 package frc.robot.subsystems.scoring; // NOTE: This should be changed if you keep your constants in a separate package from your code
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
@@ -13,7 +13,7 @@ import coppercore.parameter_tools.path_provider.EnvironmentHandler;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.Filesystem;
 
 
@@ -81,6 +81,8 @@ public final class ElevatorConstants {
   public final Current elevatorStatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
 
   public final Double elevatorReduction = 1.0; // TODO: Replace placeholder reduction
+
+  public final Double elevatorHeightPerElevatorEncoderRotationMeters = 0.1;
   public final Distance elevatorMinMinHeight = Meters.of(0.0); // TODO: Replace placeholder constraints
   public final Distance elevatorMaxMaxHeight = Meters.of(1.0);
   public static final class Sim {

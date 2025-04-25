@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 {% endblock %}
 {%- block sim_import %}
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 {%- endblock %}
 {%- block sim_declaration %}
@@ -32,14 +34,13 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
     Distance {{ name|lowerfirst }}Height = Meters.of({{ name|lowerfirst }}Sim.getPositionMeters());
     LinearVelocity {{ name|lowerfirst }}Velocity = MetersPerSecond.of({{ name|lowerfirst }}Sim.getVelocityMetersPerSecond());
 
-    Logger.recordOutput("{{ name|lowerfirst }}/sim{{ name }}HeightMeters", elevatorHeight.in(Meters));
+    Logger.recordOutput("{{ name|lowerfirst }}/sim{{ name }}HeightMeters", {{ name|lowerfirst }}Height.in(Meters));
     Logger.recordOutput(
-        "{{ name|lowerfirst }}/sim{{ name }}VelocityMetersPerSec", elevatorVelocity.in(MetersPerSecond));
+        "{{ name|lowerfirst }}/sim{{ name }}VelocityMetersPerSec", {{ name|lowerfirst }}Velocity.in(MetersPerSecond));
 
     Angle {{ encoder }}Angle = Rotations.of({{ name|lowerfirst }}Height.in(Meters) / heightPerRotation);
 
-    Angle motorAngle =
-        Rotations.of({{ encoder }}Angle.times({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Reduction));
+    Angle motorAngle = {{ encoder }}Angle.times({{ name }}Constants.synced.getObject().{{ name|lowerfirst }}Reduction);
 
     // Convert {{ name }} velocity (m/s) into angular velocity of {{ encoder }}
     // by dividing by height per rotation: (m/s) / (m/rot) = rot/s
@@ -63,5 +64,7 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
     {{ motor }}SimState.setRotorVelocity(motorVelocity);
     {{ motor }}SimState.setSupplyVoltage(RobotController.getBatteryVoltage());
 {% endfor %}
-    {{ name|lowerfirst }}Sim.setInputVoltage(leadMotorSimState.getMotorVoltage());
+    {{ name|lowerfirst }}Sim.setInputVoltage({{ lead_motor }}SimState.getMotorVoltage());
+
+    {{ name|lowerfirst }}Sim.update(SimConstants.simDeltaTime.in(Seconds));
 {%- endblock %}

@@ -1,7 +1,12 @@
 package frc.robot.{{ package }}; // NOTE: This should be changed if you keep your constants in a separate package from your code
 
 import static edu.wpi.first.units.Units.Amps;
+{%- if kind == "Arm" %}
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
+{%- endif %}
+{%- if kind == "Elevator" %}
+import static edu.wpi.first.units.Units.Kilograms;
+{%- endif %}
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 {%- if kind != "Flywheel" and kind|pos_unit != "Meters" %}
@@ -16,7 +21,12 @@ import coppercore.parameter_tools.path_provider.EnvironmentHandler;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+{%- if kind == "Elevator" %}
+import edu.wpi.first.units.measure.Mass;
+{%- endif %}
+{%- if kind == "Arm" %}
 import edu.wpi.first.units.measure.MomentOfInertia;
+{%- endif %}
 import edu.wpi.first.wpilibj.Filesystem;
 
 
@@ -89,7 +99,9 @@ public final class {{ name }}Constants {
   public final Current {{ name|lowerfirst }}StatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
 
   public final Double {{ name|lowerfirst }}Reduction = 1.0; // TODO: Replace placeholder reduction
-
+{% if kind == "Elevator" %}
+  public final Double {{ name|lowerfirst }}HeightPer{{ encoder|upperfirst }}RotationMeters = 0.1;
+{%- endif %}
 {%- if kind != "Flywheel" %}
   public final {{ kind|pos_dimension }} {{ name|lowerfirst }}MinMin{{ kind|goal }} = {{ kind|pos_unit }}.of(0.0); // TODO: Replace placeholder constraints
   public final {{ kind|pos_dimension }} {{ name|lowerfirst }}MaxMax{{ kind|goal }} = {{ kind|pos_unit }}.of(1.0);

@@ -1,6 +1,9 @@
 package frc.robot.subsystems.scoring;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.units.Units.VoltsPerRadianPerSecond;
@@ -10,6 +13,7 @@ import coppercore.parameter_tools.LoggedTunableNumber;
 import coppercore.wpilib_interface.UnitUtils;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.subsystems.scoring.ElevatorIO.ElevatorOutputMode;
 import org.littletonrobotics.junction.Logger;
@@ -25,11 +29,11 @@ public class ElevatorMechanism {
   ElevatorInputsAutoLogged inputs = new ElevatorInputsAutoLogged();
   ElevatorOutputsAutoLogged outputs = new ElevatorOutputsAutoLogged();
 
-  MutDistance goalHeight = Rotations.mutable(0.0);
-  MutDistance clampedGoalHeight = Rotations.mutable(0.0);
+  MutDistance goalHeight = Meters.mutable(0.0);
+  MutDistance clampedGoalHeight = Meters.mutable(0.0);
 
-  MutDistance minDistance = ElevatorConstants.synced.getObject().elevatorMinMinDistance.mutableCopy();
-  MutDistance maxDistance = ElevatorConstants.synced.getObject().elevatorMaxMaxDistance.mutableCopy();
+  MutDistance minHeight = ElevatorConstants.synced.getObject().elevatorMinMinHeight.mutableCopy();
+  MutDistance maxHeight = ElevatorConstants.synced.getObject().elevatorMaxMaxHeight.mutableCopy();
 
   LoggedTunableNumber elevatorkP;
   LoggedTunableNumber elevatorkI;
@@ -141,7 +145,7 @@ public class ElevatorMechanism {
         LoggedTunableNumber.ifChanged(
             hashCode(),
             (setpoint) -> {
-              setGoalDistance(Rotations.of(setpoint[0]));
+              setGoalHeight(Meters.of(setpoint[0]));
             },
             elevatorTuningSetpointRotations);
       /*  case ElevatorVoltageTuning:
@@ -174,22 +178,22 @@ public class ElevatorMechanism {
    * to get there once it is allowed.
    */
   private void updateClampedGoalHeight() {
-    clampedGoalHeight.mut_replace(UnitUtils.clampMeasure(goalDistance, minDistance, maxDistance));
+    clampedGoalHeight.mut_replace(UnitUtils.clampMeasure(goalHeight, minHeight, maxHeight));
 
     Logger.recordOutput("Elevator/clampedGoalHeight", clampedGoalHeight);
   }
 
   /**
-   * Set the goal angle the elevator will to control about.
+   * Set the goal height the elevator will to control to.
    *
-   * <p>This goal angle will be clamped by the allowed range of motion
+   * <p>This goal height will be clamped by the allowed range of motion
    *
    * @param goalDistance The new goal angle
    */
-  public void setGoalDistance(Distance goalDistance) {
-    this.goalDistance.mut_replace(goalDistance);
+  public void setGoalHeight(Distance goalHeight) {
+    this.goalHeight.mut_replace(goalHeight);
 
-    Logger.recordOutput("Elevator/goalDistance", goalDistance);
+    Logger.recordOutput("Elevator/goalHeight", goalHeight);
   }
   /**
    * Sets the minimum and maximum allowed heights that the elevator may target.
@@ -204,8 +208,8 @@ public class ElevatorMechanism {
    *     elevatorMaxMaxDistance before being applied
    */
   public void setAllowedRangeOfMotion(Distance minHeight, Distance maxHeight) {
-    setMinHeight(minDistance);
-    setMaxHeight(maxDistance);
+    setMinHeight(minHeight);
+    setMaxHeight(maxHeight);
   }
 
   /**
@@ -219,9 +223,9 @@ public class ElevatorMechanism {
    *     elevatorMaxMaxHeight before being applied
    */
   public void setMinHeight(Distance minHeight) {
-    this.minDistance.mut_replace(
+    this.minHeight.mut_replace(
         UnitUtils.clampMeasure(
-            minDistance,
+            minHeight,
             ElevatorConstants.synced.getObject().elevatorMinMinHeight,
             ElevatorConstants.synced.getObject().elevatorMaxMaxHeight));
 
@@ -254,6 +258,7 @@ public class ElevatorMechanism {
    * @return
    */
   public Distance getElevatorHeight() {
+    return elevatorEncoderAngleToElevatorHeight(inputs.elevatorEncoderPos);
   }
 
   /**
@@ -262,7 +267,8 @@ public class ElevatorMechanism {
    * @return The current velocity of the elevator, according to the elevatorEncoder
    */
   public LinearVelocity getElevatorVelocity() {
-    return inputs.elevatorEncoderVel;
+  return MetersPerSecond.of(
+    inputs.elevatorEncoderVel.in(RotationsPerSecond) * ElevatorConstants.synced.getObject().elevatorHeightPerElevatorEncoderRotationMeters);
   }
 
   /**
@@ -294,7 +300,7 @@ public class ElevatorMechanism {
   }
 
   /** Get the current unclamped goal height of the elevator */
-  public Height getElevatorGoalHeight() {
+  public Distance getGoalHeight() {
     return goalHeight;
   }
 

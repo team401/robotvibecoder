@@ -1,6 +1,9 @@
 package frc.robot.{{ package }};
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.{{ kind|pos_unit }};
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.units.Units.VoltsPerRadianPerSecond;
@@ -11,6 +14,9 @@ import coppercore.wpilib_interface.UnitUtils;
 {%-if kind != "Flywheel" %}
 import edu.wpi.first.units.measure.{{ kind|pos_dimension }};
 import edu.wpi.first.units.measure.Mut{{ kind|pos_dimension }};
+{%- endif %}
+{%- if kind == "Elevator" %}
+import edu.wpi.first.units.measure.Angle;
 {%- endif %}
 import edu.wpi.first.units.measure.{{ kind|vel_dimension }};
 import frc.robot.{{ package }}.{{ name }}IO.{{ name }}OutputMode;
@@ -27,13 +33,13 @@ public class {{ name }}Mechanism {
   {{ name }}InputsAutoLogged inputs = new {{ name }}InputsAutoLogged();
   {{ name }}OutputsAutoLogged outputs = new {{ name }}OutputsAutoLogged();
 
-  Mut{{ kind|pos_dimension }} goal{{ kind|goal }} = Rotations.mutable(0.0);
+  Mut{{ kind|pos_dimension }} goal{{ kind|goal }} = {{ kind|pos_unit }}.mutable(0.0);
 {%- if kind != "Flywheel" %}
-  Mut{{ kind|pos_dimension }} clampedGoal{{ kind|goal }} = Rotations.mutable(0.0);
+  Mut{{ kind|pos_dimension }} clampedGoal{{ kind|goal }} = {{ kind|pos_unit }}.mutable(0.0);
 {%- endif %}
 
-  Mut{{ kind|pos_dimension }} min{{ kind|pos_dimension }} = {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MinMin{{ kind|pos_dimension }}.mutableCopy();
-  Mut{{ kind|pos_dimension }} max{{ kind|pos_dimension }} = {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MaxMax{{ kind|pos_dimension }}.mutableCopy();
+  Mut{{ kind|pos_dimension }} min{{ kind|goal }} = {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MinMin{{ kind|goal }}.mutableCopy();
+  Mut{{ kind|pos_dimension }} max{{ kind|goal }} = {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MaxMax{{ kind|goal }}.mutableCopy();
 
   LoggedTunableNumber {{ name|lowerfirst }}kP;
   LoggedTunableNumber {{ name|lowerfirst }}kI;
@@ -145,7 +151,7 @@ public class {{ name }}Mechanism {
         LoggedTunableNumber.ifChanged(
             hashCode(),
             (setpoint) -> {
-              setGoal{{ kind|pos_dimension }}(Rotations.of(setpoint[0]));
+              setGoal{{ kind|goal }}({{ kind|pos_unit }}.of(setpoint[0]));
             },
             {{ name|lowerfirst }}TuningSetpointRotations);
       /*  case {{ name }}VoltageTuning:
@@ -188,23 +194,23 @@ public class {{ name }}Mechanism {
    * to get there once it is allowed.
    */
   private void updateClampedGoal{{ kind|goal }}() {
-    clampedGoal{{ kind|goal }}.mut_replace(UnitUtils.clampMeasure(goal{{ kind|pos_dimension }}, min{{ kind|pos_dimension }}, max{{ kind|pos_dimension }}));
+    clampedGoal{{ kind|goal }}.mut_replace(UnitUtils.clampMeasure(goal{{ kind|goal }}, min{{ kind|goal }}, max{{ kind|goal }}));
 
     Logger.recordOutput("{{ name }}/clampedGoal{{ kind|goal }}", clampedGoal{{ kind|goal }});
   }
 {%- endif %}
 
   /**
-   * Set the goal angle the {{ name|lowerfirst }} will to control about.
+   * Set the goal {{ kind|goal|lowerfirst }} the {{ name|lowerfirst }} will to control to.
    *
-   * <p>This goal angle will be clamped by the allowed range of motion
+   * <p>This goal {{ kind|goal|lowerfirst }} will be clamped by the allowed range of motion
    *
    * @param goal{{ kind|pos_dimension }} The new goal angle
    */
-  public void setGoal{{ kind|pos_dimension }}({{ kind|pos_dimension }} goal{{ kind|pos_dimension }}) {
-    this.goal{{ kind|pos_dimension }}.mut_replace(goal{{ kind|pos_dimension }});
+  public void setGoal{{ kind|goal }}({{ kind|pos_dimension }} goal{{ kind|goal }}) {
+    this.goal{{ kind|goal }}.mut_replace(goal{{ kind|goal }});
 
-    Logger.recordOutput("{{ name }}/goal{{ kind|pos_dimension }}", goal{{ kind|pos_dimension }});
+    Logger.recordOutput("{{ name }}/goal{{ kind|goal }}", goal{{ kind|goal }});
   }
 
 {%- if kind != "Flywheel" %}
@@ -221,8 +227,8 @@ public class {{ name }}Mechanism {
    *     {{ name|lowerfirst }}MaxMax{{ kind|pos_dimension }} before being applied
    */
   public void setAllowedRangeOfMotion({{ kind|pos_dimension }} min{{ kind|goal }}, {{ kind|pos_dimension }} max{{ kind|goal }}) {
-    setMin{{ kind|goal }}(min{{ kind|pos_dimension }});
-    setMax{{ kind|goal }}(max{{ kind|pos_dimension }});
+    setMin{{ kind|goal }}(min{{ kind|goal }});
+    setMax{{ kind|goal }}(max{{ kind|goal }});
   }
 
   /**
@@ -236,9 +242,9 @@ public class {{ name }}Mechanism {
    *     {{ name|lowerfirst }}MaxMax{{ kind|goal }} before being applied
    */
   public void setMin{{ kind|goal }}({{ kind|pos_dimension }} min{{ kind|goal }}) {
-    this.min{{ kind|pos_dimension }}.mut_replace(
+    this.min{{ kind|goal }}.mut_replace(
         UnitUtils.clampMeasure(
-            min{{ kind|pos_dimension }},
+            min{{ kind|goal }},
             {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MinMin{{ kind|goal }},
             {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}MaxMax{{ kind|goal }}));
 
@@ -285,7 +291,12 @@ public class {{ name }}Mechanism {
    * @return The current velocity of the {{ name|lowerfirst }}, according to the {{ encoder }}
    */
   public {{ kind|vel_dimension }} get{{ name }}Velocity() {
+{%- if kind != "Elevator" %}
     return inputs.{{ encoder }}Vel;
+{%- else %}
+  return MetersPerSecond.of(
+    inputs.{{ encoder }}Vel.in(RotationsPerSecond) * {{ name }}Constants.synced.getObject().{{ name|lowerfirst }}HeightPer{{ encoder|upperfirst }}RotationMeters);
+{%- endif%}
   }
 
   /**
@@ -317,7 +328,7 @@ public class {{ name }}Mechanism {
   }
 
   /** Get the current{%if kind != "Flywheel"%} unclamped{% endif %} goal {{ kind|goal|lowerfirst }} of the {{ name|lowerfirst }} */
-  public {{ kind|goal_dimension }} get{{ name }}Goal{{ kind|goal }}() {
+  public {{ kind|goal_dimension }} getGoal{{ kind|goal }}() {
     return goal{{ kind|goal }};
   }
 {%- if kind == "Elevator" %}

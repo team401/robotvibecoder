@@ -16,6 +16,8 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.robot.constants.JsonConstants;
 import frc.robot.constants.SimConstants;
@@ -62,8 +64,7 @@ public class ElevatorIOSim extends ElevatorIOTalonFX {
 
     Angle elevatorEncoderAngle = Rotations.of(elevatorHeight.in(Meters) / heightPerRotation);
 
-    Angle motorAngle =
-        Rotations.of(elevatorEncoderAngle.times(ElevatorConstants.synced.getObject().elevatorReduction));
+    Angle motorAngle = elevatorEncoderAngle.times(ElevatorConstants.synced.getObject().elevatorReduction);
 
     // Convert Elevator velocity (m/s) into angular velocity of elevatorEncoder
     // by dividing by height per rotation: (m/s) / (m/rot) = rot/s
@@ -92,6 +93,8 @@ public class ElevatorIOSim extends ElevatorIOTalonFX {
     followerMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
 
     elevatorSim.setInputVoltage(leadMotorSimState.getMotorVoltage());
+
+    elevatorSim.update(SimConstants.simDeltaTime.in(Seconds));
   }
 
   @Override
