@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import coppercore.parameter_tools.json.JSONExclude;
@@ -69,16 +70,17 @@ public final class WristConstants {
    * kV results in the maximum velocity of the system. Therefore, a higher profile kV results in a
    * lower profile velocity.
   */
-  public final Double wristExpo_kV_raw = 0.0;
+  public final Double wristMotionMagicExpo_kV = 0.0;
 
   /*
    * The Motion Magic Expo kA, measured in Volts per Radian per Second Squared, but represented as a double so it can be synced by JSONSync
   */
-  public final Double wristExpo_kA_raw = 0.0;
+  public final Double wristMotionMagicExpo_kA = 0.0;
 
   public final Current wristStatorCurrentLimit = Amps.of(80.0); // TODO: Replace placeholder current limit
 
   public final Double wristReduction = 1.0; // TODO: Replace placeholder reduction
+
   public final Angle wristMinMinAngle = Rotations.of(0.0); // TODO: Replace placeholder constraints
   public final Angle wristMaxMaxAngle = Rotations.of(1.0);
   public static final class Sim {

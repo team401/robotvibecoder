@@ -205,7 +205,8 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
               "{{ name|lowerfirst }}/referenceSlope",
               {{ lead_motor }}.getClosedLoopReferenceSlope().getValueAsDouble());
           outputs.{{ name|lowerfirst }}AppliedVolts.mut_replace(
-              Volts.of({{ lead_motor }}.getClosedLoopOutput().getValueAsDouble()));
+              {{ lead_motor }}.getMotorVoltage().getValue());
+          outputs.{{ name|lowerfirst }}ClosedLoopOutput = {{ lead_motor }}.getClosedLoopOutput().getValueAsDouble();
           outputs.pContrib.mut_replace(
               Volts.of({{ lead_motor }}.getClosedLoopProportionalOutput().getValueAsDouble()));
           outputs.iContrib.mut_replace(
