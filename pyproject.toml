@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "versioningit"]
 build-backend = "hatchling.build"
 
 [project]
@@ -10,9 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = "GPL-3.0"
 keywords = []
-authors = [
-  { name = "aidnem", email = "99768676+aidnem@users.noreply.github.com" },
-]
+authors = [{ name = "team401" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
@@ -27,20 +25,35 @@ classifiers = [
 dependencies = ["jinja2==3.1.6"]
 
 [project.urls]
-Documentation = "https://github.com/aidnem/robotvibecoder#readme"
-Issues = "https://github.com/aidnem/robotvibecoder/issues"
-Source = "https://github.com/aidnem/robotvibecoder"
+Documentation = "https://github.com/team401/robotvibecoder#readme"
+Issues = "https://github.com/team401/robotvibecoder/issues"
+Source = "https://github.com/team401/robotvibecoder"
 
 [project.scripts]
 robotvibecoder = "robotvibecoder.main:main"
 
 [tool.hatch.version]
-path = "src/robotvibecoder/__about__.py"
+source = "versioningit"
 
 [tool.hatch.envs.types]
 extra-dependencies = ["mypy>=1.0.0"]
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/robotvibecoder tests}"
+
+[tool.versioningit]
+
+[tool.versioningit.format]
+# Format used when there have been commits since the most recent tag:
+distance = "{base_version}.post{distance}+{vcs}{rev}"
+# Example formatted version: 1.2.3.post42+ge174a1f
+
+# Format used when there are uncommitted changes:
+dirty = "{base_version}+d{build_date:%Y%m%d}"
+# Example formatted version: 1.2.3+d20230922
+
+# Format used when there are both commits and uncommitted changes:
+distance-dirty = "{base_version}.post{distance}+{vcs}{rev}.d{build_date:%Y%m%d}"
+# Example formatted version: 1.2.3.post42+ge174a1f.d20230922
 
 [tool.coverage.run]
 source_pkgs = ["robotvibecoder", "tests"]
