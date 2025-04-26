@@ -12,7 +12,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         prog="RobotVibeCoder",
         description="Automatically generates boilerplate FRC mechanisms",
-        epilog="For documentation or to open a ticket, visit https://github.com/aidnem/robotvibecoder",
+        epilog="For documentation or to open a ticket, visit https://github.com/team401/robotvibecoder",
     )
     parser.add_argument(
         "-f",
