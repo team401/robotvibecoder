@@ -33,7 +33,7 @@ def generate(args: Namespace) -> None:
 
     env = generate_env()
 
-    if config.kind == MechanismKind.Flywheel:
+    if config.kind == MechanismKind.FLYWHEEL:
         raise NotImplementedError("Flywheel Mechanisms are not implemented yet :(")
 
     template_to_output_map: dict[str, str] = {

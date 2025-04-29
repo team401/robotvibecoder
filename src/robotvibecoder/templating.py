@@ -1,9 +1,16 @@
+"""
+Handles creation of a jinja2 environment and the definitions of custom filters.
+"""
+
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from robotvibecoder import constants
 
 
 def article(word: str) -> str:
+    """
+    Given a word, return 'an' if the word starts with vowel and 'a' otherwise
+    """
     return "an" if word[0].lower() in "aeiou" else "a"
 
 
@@ -33,7 +40,7 @@ def hash_can_id(device: str) -> str:
         canIdMap[device] = nextId
         print(f"  {constants.Colors.fg_green}➜{constants.Colors.reset} ", end="")
         print(
-            f"Mapped device {constants.Colors.fg_cyan}{device}{constants.Colors.reset} to placeholder CAN ID {constants.Colors.fg_cyan}{nextId}{constants.Colors.reset}"
+            f"Mapped device {constants.Colors.fg_cyan}{device}{constants.Colors.reset} to placeholder CAN ID {constants.Colors.fg_cyan}{nextId}{constants.Colors.reset}"  # pylint: disable=line-too-long
         )
         nextId += 1
 
@@ -50,7 +57,7 @@ def pos_dimension(kind: str) -> str:
         return "Distance"
     else:
         print(
-            f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_dimension."
+            f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_dimension."  # pylint: disable=line-too-long
         )
         print(
             "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
@@ -79,7 +86,7 @@ def pos_unit(kind: str) -> str:
         return "Meters"
     else:
         print(
-            f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_unit."
+            f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_unit."  # pylint: disable=line-too-long
         )
         print(
             "This is a robotvibecoder issue, NOT user error. Please report this on github!"
