@@ -1,6 +1,12 @@
+"""
+The 'generate' subcommand, for templating/generating a mechanism from a config
+"""
+
 from argparse import Namespace
 import json
+import os
 import sys
+
 from robotvibecoder import constants
 from robotvibecoder.config import (
     MechanismConfig,
@@ -10,10 +16,12 @@ from robotvibecoder.config import (
     validate_config,
 )
 from robotvibecoder.templating import generate_env
-import os
 
 
 def generate(args: Namespace) -> None:
+    """
+    Given a config (either a path or via stdin), template and generate mechanism boilerplate files
+    """
     if args.stdin:
         print("Reading config from stdin.")
         data = json.load(sys.stdin)
@@ -22,7 +30,7 @@ def generate(args: Namespace) -> None:
     else:
         if args.config is None:
             print(
-                "Error: Config not specified: Either --stdin or --config [file] must be supplied to command."
+                "Error: Config not specified: Either --stdin or --config [file] must be supplied to command."  # pylint: disable=line-too-long
             )
             sys.exit(1)
         config_path = os.path.join(args.folder, args.config)
@@ -46,12 +54,12 @@ def generate(args: Namespace) -> None:
 
     if not args.stdin:
         print(
-            f"{constants.Colors.fg_red}{constants.Colors.bold}WARNING{constants.Colors.reset}: This will create/overwrite files at the following paths:"
+            f"{constants.Colors.fg_red}{constants.Colors.bold}WARNING{constants.Colors.reset}: This will create/overwrite files at the following paths:"  # pylint: disable=line-too-long
         )
-        for file_template in template_to_output_map:
+        for file_template, file_output in template_to_output_map.items():
             output_path = os.path.join(
                 args.folder,
-                template_to_output_map[file_template].format(name=config.name),
+                file_output.format(name=config.name),
             )
             print(f"  {output_path}")
         try:
@@ -61,13 +69,12 @@ def generate(args: Namespace) -> None:
             sys.exit(0)
 
     print("Templating files:")
-    for file_template in template_to_output_map:
-        output_path = os.path.join(
-            args.folder, template_to_output_map[file_template].format(name=config.name)
-        )
+    for file_template, file_output in template_to_output_map.items():
+        output_path = os.path.join(args.folder, file_output.format(name=config.name))
 
         if os.path.exists(output_path) and args.stdin:
-            # stdin mode skips the warning prompt at the start, so files would be destroyed, necessitating this check
+            # stdin mode skips the warning prompt at the start, so files would
+            # be destroyed, necessitating this check
             print(
                 f"Error: File {output_path} already exists. Please move/delete it and retry"
             )
@@ -78,5 +85,5 @@ def generate(args: Namespace) -> None:
         template = env.get_template(template_path)
 
         output: str = template.render(config.__dict__)
-        with open(output_path, "w+") as outfile:
+        with open(output_path, "w+", encoding="utf-8") as outfile:
             outfile.write(output)

@@ -12,13 +12,17 @@ from robotvibecoder.config import MechanismConfig, MechanismKind
 
 
 def new_config_interactive() -> MechanismConfig:
+    """
+    Prompt the user for each field of a config to generate one interactively
+    """
+
     print(
         "Interactively generating new config. Please enter each field and press [Enter]."
     )
     print("Package: will come after frc.robot (e.g. `subsystems.scoring`)")
     package: str = input("> ")
     print(
-        "Name: should be capitalized and should not end in Mechanism or Subsystem, as this is automatically added"
+        "Name: should be capitalized and should not end in Mechanism or Subsystem, as this is automatically added"  # pylint: disable=line-too-long
     )
     name: str = input("> ")
 
@@ -67,11 +71,14 @@ def new_config_interactive() -> MechanismConfig:
 
 
 def new(args: Namespace) -> None:
+    """
+    Generate a new config file, either with placeholder values or interactively in the CLI
+    """
     config_path = os.path.join(args.folder, args.outfile)
 
     print(f"[{constants.Colors.title_str}] Creating a new config file")
     print(
-        f"  {constants.Colors.fg_red}{constants.Colors.bold}WARNING{constants.Colors.reset}: This will create/overwrite a file at `{constants.Colors.fg_cyan}{config_path}{constants.Colors.reset}`"
+        f"  {constants.Colors.fg_red}{constants.Colors.bold}WARNING{constants.Colors.reset}: This will create/overwrite a file at `{constants.Colors.fg_cyan}{config_path}{constants.Colors.reset}`"  # pylint: disable=line-too-long
     )
     try:
         input("  Press Ctrl+C to cancel or [Enter] to continue")
@@ -86,5 +93,5 @@ def new(args: Namespace) -> None:
         config = constants.DEFAULT_CONFIG
 
     print(f"[{constants.Colors.title_str}] Writing config file")
-    with open(config_path, "w+") as outfile:
+    with open(config_path, "w+", encoding="utf-8") as outfile:
         json.dump(config.__dict__, fp=outfile, indent=2)

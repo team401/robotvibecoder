@@ -15,36 +15,59 @@ def article(word: str) -> str:
 
 
 def plural(words: list[str]) -> str:
+    """
+    Given a list of words, return 's' if more than 1 word is present, otherwise ''
+    """
     return "s" if len(words) > 1 else ""
 
 
 def lowerfirst(word: str) -> str:
+    """
+    Lowercase the first letter of the input and return it
+    """
     return word[0].lower() + word[1:]
 
 
 def upperfirst(word: str) -> str:
+    """
+    Uppercase the first letter of the input and return it
+    """
     return word[0].upper() + word[1:]
 
 
-canIdMap: dict[str, int] = {}
-nextId = 1
+class GlobalTemplateState:  # pylint: disable=too-few-public-methods
+    """
+    Manages global state for templates:
+
+    For example, CAN IDs should never be reused so this needs to be global
+    """
+
+    last_id = 0  # This value is initialized to zero because it is incremented before being used
+    can_id_map: dict[str, int] = {}
+
+    @staticmethod
+    def new_id() -> int:
+        """
+        Generate a new CAN ID and increment the last ID counter
+        """
+
+        GlobalTemplateState.last_id += 1
+        return GlobalTemplateState.last_id
 
 
 def hash_can_id(device: str) -> str:
     """
     Given a device name, generate a unique CAN Id that is tied to that device
     """
-    global nextId
-
-    if device not in canIdMap:
-        canIdMap[device] = nextId
+    if device not in GlobalTemplateState.can_id_map:
+        next_id = GlobalTemplateState.new_id()
+        GlobalTemplateState.can_id_map[device] = next_id
         print(f"  {constants.Colors.fg_green}➜{constants.Colors.reset} ", end="")
         print(
-            f"Mapped device {constants.Colors.fg_cyan}{device}{constants.Colors.reset} to placeholder CAN ID {constants.Colors.fg_cyan}{nextId}{constants.Colors.reset}"  # pylint: disable=line-too-long
+            f"Mapped device {constants.Colors.fg_cyan}{device}{constants.Colors.reset} to placeholder CAN ID {constants.Colors.fg_cyan}{next_id}{constants.Colors.reset}"  # pylint: disable=line-too-long
         )
-        nextId += 1
 
-    return str(canIdMap[device])
+    return str(GlobalTemplateState.can_id_map[device])
 
 
 def pos_dimension(kind: str) -> str:
@@ -53,17 +76,17 @@ def pos_dimension(kind: str) -> str:
     """
     if kind == "Arm":
         return "Angle"
-    elif kind == "Elevator":
+    if kind == "Elevator":
         return "Distance"
-    else:
-        print(
-            f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_dimension."  # pylint: disable=line-too-long
-        )
-        print(
-            "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
-        )
-        raise ValueError(f"Invalid kind {kind} passed to pos_dimension")
+
     # Flywheels won't have a position
+    print(
+        f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_dimension."  # pylint: disable=line-too-long
+    )
+    print(
+        "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
+    )
+    raise ValueError(f"Invalid kind {kind} passed to pos_dimension")
 
 
 def vel_dimension(kind: str) -> str:
@@ -72,8 +95,8 @@ def vel_dimension(kind: str) -> str:
     """
     if kind == "Elevator":
         return "LinearVelocity"
-    else:
-        return "AngularVelocity"
+
+    return "AngularVelocity"
 
 
 def pos_unit(kind: str) -> str:
@@ -82,16 +105,16 @@ def pos_unit(kind: str) -> str:
     """
     if kind == "Arm":
         return "Rotations"
-    elif kind == "Elevator":
+    if kind == "Elevator":
         return "Meters"
-    else:
-        print(
-            f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_unit."  # pylint: disable=line-too-long
-        )
-        print(
-            "This is a robotvibecoder issue, NOT user error. Please report this on github!"
-        )
-        raise ValueError(f"Invalid kind {kind} passed to pos_unit")
+
+    print(
+        f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_unit."  # pylint: disable=line-too-long
+    )
+    print(
+        "This is a robotvibecoder issue, NOT user error. Please report this on github!"
+    )
+    raise ValueError(f"Invalid kind {kind} passed to pos_unit")
 
 
 def vel_unit(kind: str) -> str:
@@ -100,8 +123,8 @@ def vel_unit(kind: str) -> str:
     """
     if kind == "Elevator":
         return "MetersPerSecond"
-    else:
-        return "RotationsPerSecond"
+
+    return "RotationsPerSecond"
 
 
 def goal(kind: str) -> str:
@@ -113,10 +136,18 @@ def goal(kind: str) -> str:
 
     if kind == "Arm":
         return "Angle"
-    elif kind == "Elevator":
+    if kind == "Elevator":
         return "Height"
-    else:
+    if kind == "Flywheel":
         return "Speed"
+
+    print(
+        f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to goal."  # pylint: disable=line-too-long
+    )
+    print(
+        "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
+    )
+    raise ValueError(f"Invalid kind {kind} passed to goal filter")
 
 
 def goal_dimension(kind: str) -> str:
@@ -128,13 +159,26 @@ def goal_dimension(kind: str) -> str:
 
     if kind == "Arm":
         return "Angle"
-    elif kind == "Elevator":
+    if kind == "Elevator":
         return "Distance"
-    else:
+    if kind == "Flywheel":
         return "AngularVelocity"
+
+    print(
+        f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to goal_dimension."  # pylint: disable=line-too-long
+    )
+    print(
+        "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
+    )
+    raise ValueError(f"Invalid kind {kind} passed to goal_dimension")
 
 
 def generate_env() -> Environment:
+    """
+    Generate a Jinja2 Environment using a PackageLoader loading from
+    'robotvibecoder', add all custom filters, and return it.
+    """
+
     env = Environment(
         loader=PackageLoader("robotvibecoder"), autoescape=select_autoescape()
     )

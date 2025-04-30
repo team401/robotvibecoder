@@ -1,18 +1,22 @@
+"""
+Houses the main entrypoint for RobotVibeCoder CLI and argument parsing
+"""
+
 import argparse
-import sys
-from sys import argv
 from robotvibecoder import constants
-from robotvibecoder.config import load_json_config
-from robotvibecoder.templating import generate_env
 from robotvibecoder.subcommands.new import new
 from robotvibecoder.subcommands.generate import generate
 
 
 def main() -> None:
+    """
+    Main entry point for the CLI. Parses args and invokes a subcommand.
+    """
+
     parser = argparse.ArgumentParser(
         prog="RobotVibeCoder",
         description="Automatically generates boilerplate FRC mechanisms",
-        epilog="For documentation or to open a ticket, visit https://github.com/team401/robotvibecoder",
+        epilog="For documentation or to open a ticket, visit https://github.com/team401/robotvibecoder",  # pylint: disable=line-too-long
     )
     parser.add_argument(
         "-f",
