@@ -78,8 +78,9 @@ def new(args: Namespace) -> None:
     config_path = os.path.join(args.folder, args.outfile)
 
     print(f"[{robotvibecoder.cli.Colors.title_str}] Creating a new config file")
-    print(
-        f"  {robotvibecoder.cli.Colors.fg_red}{robotvibecoder.cli.Colors.bold}WARNING{robotvibecoder.cli.Colors.reset}: This will create/overwrite a file at `{robotvibecoder.cli.Colors.fg_cyan}{config_path}{robotvibecoder.cli.Colors.reset}`"  # pylint: disable=line-too-long
+    print("  ", end="", file=sys.stderr)  # Indent the warning on the line below
+    robotvibecoder.cli.print_warning(
+        f"This will create/overwrite a file at `{robotvibecoder.cli.Colors.fg_cyan}{config_path}{robotvibecoder.cli.Colors.reset}`"  # pylint: disable=line-too-long
     )
     try:
         input("  Press Ctrl+C to cancel or [Enter] to continue")

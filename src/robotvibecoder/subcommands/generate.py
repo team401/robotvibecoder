@@ -8,7 +8,7 @@ import os
 import sys
 
 from robotvibecoder import cli
-from robotvibecoder.cli import print_err
+from robotvibecoder.cli import print_err, print_warning
 from robotvibecoder.config import (
     MechanismConfig,
     MechanismKind,
@@ -54,8 +54,8 @@ def generate(args: Namespace) -> None:
     }
 
     if not args.stdin:
-        print(
-            f"{cli.Colors.fg_red}{cli.Colors.bold}WARNING{cli.Colors.reset}: This will create/overwrite files at the following paths:"  # pylint: disable=line-too-long
+        print_warning(
+            "This will create/overwrite files at the following paths:"  # pylint: disable=line-too-long
         )
         for file_template, file_output in template_to_output_map.items():
             output_path = os.path.join(
