@@ -3,7 +3,7 @@ Houses the main entrypoint for RobotVibeCoder CLI and argument parsing
 """
 
 import argparse
-from robotvibecoder import constants
+from robotvibecoder import cli
 from robotvibecoder.subcommands.new import new
 from robotvibecoder.subcommands.generate import generate
 
@@ -58,9 +58,7 @@ def main() -> None:
     # Call the default function defined by the subcommand
     args.func(args)
 
-    print(
-        f"{constants.Colors.fg_green}{constants.Colors.bold}Done.{constants.Colors.reset}"
-    )
+    print(f"{cli.Colors.fg_green}{cli.Colors.bold}Done.{cli.Colors.reset}")
 
 
 if __name__ == "__main__":
