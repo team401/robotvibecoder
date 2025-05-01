@@ -209,7 +209,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
               "elevator/referenceSlope",
               leadMotor.getClosedLoopReferenceSlope().getValueAsDouble());
           outputs.elevatorAppliedVolts.mut_replace(
-              Volts.of(leadMotor.getClosedLoopOutput().getValueAsDouble()));
+              leadMotor.getMotorVoltage().getValue());
+          outputs.elevatorClosedLoopOutput = leadMotor.getClosedLoopOutput().getValueAsDouble();
           outputs.pContrib.mut_replace(
               Volts.of(leadMotor.getClosedLoopProportionalOutput().getValueAsDouble()));
           outputs.iContrib.mut_replace(

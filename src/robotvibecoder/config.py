@@ -103,3 +103,14 @@ def validate_config(config: MechanismConfig) -> None:
             f"  Found `{config.lead_motor}` but expected one of {', '.join(['`' + motor + '`' for motor in config.motors])}"  # pylint: disable=line-too-long
         )
         sys.exit(1)
+
+    if len(config.motors) != len(set(config.motors)):
+        motors_seen: set[str] = set()
+
+        for motor in config.motors:
+            if motor not in motors_seen:
+                motors_seen.add(motor)
+            else:
+                print_err(f"`{config.name}` config: Duplicate motor {motor}")
+
+        sys.exit(1)
