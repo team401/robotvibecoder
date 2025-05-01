@@ -1,3 +1,10 @@
+"""RobotVibeCoder Config Module
+
+Houses the MechanismConfig class, a dataclass for describing mechanisms.
+
+Also contains utils for loading and generating configs.
+"""
+
 from dataclasses import dataclass, fields
 from enum import Enum
 import json
@@ -5,13 +12,23 @@ import sys
 
 
 class MechanismKind(str, Enum):
-    Arm = "Arm"
-    Elevator = "Elevator"
-    Flywheel = "Flywheel"
+    """
+    An enum for different types of mechanisms: arms, elevators, or flywheels
+
+    This is called Kind and not Type because type is a keyword in python.
+    """
+
+    ARM = "Arm"
+    ELEVATOR = "Elevator"
+    FLYWHEEL = "Flywheel"
 
 
 @dataclass
 class MechanismConfig:
+    """
+    A dataclass to represent JSON configs. This dataclass is 1:1 with a config JSON file.
+    """
+
     package: str
     name: str
     kind: MechanismKind
@@ -22,6 +39,14 @@ class MechanismConfig:
 
 
 def generate_config_from_data(data: dict) -> MechanismConfig:
+    """Given a data dict (e.g. raw JSON data), generate a MechanismConfig, printing errors and
+    exiting when config is malformed.
+
+    :param data: The JSON data to convert
+    :type data: dict
+    :return: A MechanismConfig generated from the dict
+    :rtype: MechanismConfig
+    """
     for key in data:
         if key not in [field.name for field in fields(MechanismConfig)]:
             print(f"Error: Config contained unexpected field `{key}`", file=sys.stdout)
@@ -41,8 +66,17 @@ def generate_config_from_data(data: dict) -> MechanismConfig:
 
 
 def load_json_config(config_path: str) -> MechanismConfig:
+    """Given the path a JSON config file, parse the JSON and convert it to a MechanismConfig object.
+
+    This will throw errors and exit the program if malformed JSON is written by the user.
+
+    :param config_path: Path to the config file (e.g. './config.json')
+    :type config_path: str
+    :return: The generated MechanismConfig
+    :rtype: MechanismConfig
+    """
     try:
-        with open(config_path, "r") as config_file:
+        with open(config_path, "r", encoding="utf-8") as config_file:
             data = json.load(config_file)
     except FileNotFoundError:
         print(f"Error: Specified config file {config_path} does not exist.")
@@ -61,9 +95,10 @@ def validate_config(config: MechanismConfig) -> None:
 
     if config.lead_motor not in config.motors:
         print(
-            f"Error in config `{config.name}`: `lead_motor` must be one of the motors specified by `motors`"
+            f"Error in `{config.name}` config: `lead_motor` must be one of the motors listed in `motors`"  # pylint: disable=line-too-long
         )
+
         print(
-            f"  Found `{config.lead_motor}` but expected one of {', '.join(['`' + motor + '`' for motor in config.motors])}"
+            f"  Found `{config.lead_motor}` but expected one of {', '.join(['`' + motor + '`' for motor in config.motors])}"  # pylint: disable=line-too-long
         )
         sys.exit(1)
