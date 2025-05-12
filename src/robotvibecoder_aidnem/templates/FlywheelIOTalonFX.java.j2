@@ -125,43 +125,27 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
     {%- for motor in motors %}
     {{ motor }}.getConfigurator().apply(talonFXConfigs);
     {%- endfor %}
-
-    // Make follower motor{{ motors|plural }} permanently follow lead motor.
-    {%- for motor in motors%}
-        {%- if motor != lead_motor%}
-    {{ motor }}.setControl(
-        new Follower(
-            {{ lead_motor }}.getDeviceID(),
-            {{ name }}Constants.synced.getObject().invert{{ motor|upperfirst }}FollowerRequest));
-        {%- endif %}
-    {%- endfor %}
   }
 
   @Override
   public void updateInputs({{ name }}Inputs inputs) {
     StatusCode refreshStatus = BaseStatusSignal.refreshAll({{ encoder }}Position, {{ encoder }}Velocity);
 
-    inputs.{{ encoder }}Pos.mut_replace({{ encoder }}Position.getValue());
-    inputs.{{ encoder }}Vel.mut_replace({{ encoder }}Velocity.getValue());
-    inputs.{{ encoder }}Connected = refreshStatus.isOK();
-
     refreshStatus = BaseStatusSignal.refreshAll(
         {%- for motor in motors %}
+        {{ motor }}CurrentVelocity,
         {{ motor }}SupplyCurrent,
         {{ motor }}StatorCurrent{{ "," if not loop.last }}
         {%- endfor %}
     );
 {% for motor in motors %}
+    inputs.{{ motor }}CurrentVelocity.mut_replace({{ motor }}MeasuredVelocity.getValue());
     inputs.{{ motor }}SupplyCurrent.mut_replace({{ motor }}SupplyCurrent.getValue());
     inputs.{{ motor }}StatorCurrent.mut_replace({{ motor }}StatorCurrent.getValue());
     inputs.{{ motor }}Connected = {{ motor }}.isConnected();
 {% endfor %}
-    inputs.{{ encoder }}GoalPos.mut_replace({{ encoder }}GoalAngle);
-    inputs.{{ encoder }}SetpointPos.mut_replace({{ encoder }}SetpointPosition);
 
     inputs.motionMagicError = {{ lead_motor }}.getClosedLoopError().getValueAsDouble();
-
-    inputs.{{ name|lowerfirst }}Velocity.mut_replace({{ encoder }}.getVelocity().getValue());
   }
 
   @Override
@@ -207,15 +191,11 @@ public class {{ name }}IOTalonFX implements {{ name }}IO {
     }
   }
 
+  {%- for motor in motors %}
   @Override
-  public void set{{ encoder|upperfirst }}GoalPos(Angle goalPos) {
-    {{ encoder }}GoalAngle.mut_replace(goalPos);
+  public void set{{ motor }}GoalVelocity(AngularVelocity goalVelocity) {
   }
-
-  @Override
-  public void set{{ encoder|upperfirst }}Position(Angle newAngle) {
-    {{ encoder }}.setPosition(newAngle);
-  }
+  {%- endfor %}
 
   @Override
   public void setOutputMode({{ name }}OutputMode outputMode) {

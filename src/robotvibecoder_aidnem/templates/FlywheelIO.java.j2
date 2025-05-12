@@ -43,6 +43,8 @@ public interface {{ name }}IO {
 
     /** Real Velocity of the flywheel motor */
     public MutAngularVelocity {{ motor }}MeasuredVelocity = RotationsPerSecond.mutable(0.0);
+
+    {%- endfor %}
   }
 
   @AutoLog
@@ -86,23 +88,29 @@ public interface {{ name }}IO {
   public void applyOutputs({{ name }}Outputs outputs);
 
   /**
-   * Set the goal velocity of {{ motor }} which the {{ name }} will control to when it is not in
+   * Set the goal velocity of {{ motor|plural }} which the {{ name }} will control to when it is not in
    * override mode
    */
-  public void set{{ motor|upperfirst }}GoalVelocity(AngularVelocity goalVelocity);
+  {%- for motor in motors %}
+  for public void set{{ motor }}GoalVelocity(AngularVelocity goalVelocity);
+  {%- endfor %}
 
   /**
    * Set the override voltage for the {{ motor }} when in Voltage output mode
    *
    * @param volts The voltage to apply
    */
+  {%- for motor in motors %}
   public void set{{ motor|upperfirst }}OverrideVoltage(Voltage volts);
+  {%- endfor %}
 
   /**
    * Set the static current (because of FOC) that will be applied when the {{ name }} is in Current
    * output mode.
    */
-  public void set{{ motor|upperfirst }}OverrideCurrent(Current current);
+  {%- for motor in motors %}
+  public void set{{ motor }}OverrideCurrent(Current current);
+  {%- endfor %}
 
   /**
    * Set whether the {{ name }} should use ClosedLoop control (default), voltage override, or current
