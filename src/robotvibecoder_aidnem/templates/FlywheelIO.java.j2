@@ -1,0 +1,130 @@
+package frc.robot.{{ package }};
+
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
+import edu.wpi.first.units.AngularAccelerationUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.VoltageUnit;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutCurrent;
+import edu.wpi.first.units.measure.MutVoltage;
+import edu.wpi.first.units.measure.Per;
+import edu.wpi.first.units.measure.Voltage;
+import org.littletonrobotics.junction.AutoLog;
+
+public interface {{ name }}IO {
+  enum {{name }}OutputMode {
+    ClosedLoop, // Not overriding, it should be closed loop
+    Current, // Overriding, manually applying a current
+    Voltage // Overriding, manually applying a voltage
+  }
+
+  @AutoLog
+  public static class {{ name }}Inputs {
+    {%- for motor in motors %}
+
+    public boolean {{ motor }}Connected = false;
+  
+    /** Stator current of the flywheel motor */
+    public MutCurrent {{ motor }}StatorCurrent = Amps.mutable(0.0);
+  
+    /** Supply current of the flywheel motor */
+    public MutCurrent {{ motor }}SupplyCurrent = Amps.mutable(0.0);
+  
+    /** Goal Velocity of the flywheel motor */
+    public MutAngularVelocity {{ motor }}GoalVelocity = RotationsPerSecond.mutable(0.0);
+
+    /** Real Velocity of the flywheel motor */
+    public MutAngularVelocity {{ motor }}MeasuredVelocity = RotationsPerSecond.mutable(0.0);
+  }
+
+  @AutoLog
+  public static class {{ name }}Outputs {
+    /** Are the motors currently disabled in software? */
+    public boolean motorsDisabled = false;
+
+    /** The current output mode of the {{ name }} */
+    public {{ name }}OutputMode outputMode = {{ name }}OutputMode.ClosedLoop;
+
+    /** The voltage currently applied to the motors */
+    public MutVoltage {{ name|lowerfirst }}AppliedVolts = Volts.mutable(0.0);
+
+    /** The current closed-loop output from Motion Magic */
+    public double {{ name|lowerfirst }}ClosedLoopOutput = 0.0;
+
+    /** Contribution of the p-term to motor output */
+    public MutVoltage pContrib = Volts.mutable(0.0);
+
+    /** Contribution of the i-term to motor output */
+    public MutVoltage iContrib = Volts.mutable(0.0);
+
+    /** Contribution of the d-term to motor output */
+    public MutVoltage dContrib = Volts.mutable(0.0);
+  }
+
+  /**
+   * Updates {{ name | article }} {{ name }}Inputs with the current information from sensors readings and from the
+   * motors.
+   *
+   * @param inputs {{ name }}Inputs object to update with latest information
+   */
+  public void updateInputs({{ name }}Inputs inputs);
+
+  /**
+   * Applies requests to motors and updates {{ name | article }} {{ name }}Outputs object with information about motor
+   * output.
+   *
+   * @param outputs {{ name }}Outputs object to update with latest applied outputs
+   */
+  public void applyOutputs({{ name }}Outputs outputs);
+
+  /**
+   * Set the goal velocity of {{ motor }} which the {{ name }} will control to when it is not in
+   * override mode
+   */
+  public void set{{ motor|upperfirst }}GoalVelocity(AngularVelocity goalVelocity);
+
+  /**
+   * Set the override voltage for the {{ motor }} when in Voltage output mode
+   *
+   * @param volts The voltage to apply
+   */
+  public void set{{ motor|upperfirst }}OverrideVoltage(Voltage volts);
+
+  /**
+   * Set the static current (because of FOC) that will be applied when the {{ name }} is in Current
+   * output mode.
+   */
+  public void set{{ motor|upperfirst }}OverrideCurrent(Current current);
+
+  /**
+   * Set whether the {{ name }} should use ClosedLoop control (default), voltage override, or current
+   * override
+   */
+  public void setOutputMode({{ name }}OutputMode mode);
+
+  /** Update PID gains for the {{ name }} */
+  public void setPID(double p, double i, double d);
+
+  /** Set profile constraints to be sent to Motion Magic Expo */
+  public void setMaxProfile(
+      AngularVelocity maxVelocity,
+      Per<VoltageUnit, AngularAccelerationUnit> expo_kA,
+      Per<VoltageUnit, AngularVelocityUnit> expo_kV);
+
+  /** Set feedforward gains for closed-loop control */
+  public void setFF(double kS, double kV, double kA, double kG);
+
+  /** Set the stator current limit for the {{ name }} motor{{ motors|plural }} */
+  public void setStatorCurrentLimit(Current currentLimit);
+
+  /** Set whether or not the motor{{ motors|plural }} on the {{ name }} should be disabled. */
+  public void setMotorsDisabled(boolean disabled);
+}
