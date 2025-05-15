@@ -10,6 +10,8 @@ from enum import Enum
 import json
 import sys
 
+from robotvibecoder.cli import print_err
+
 
 class MechanismKind(str, Enum):
     """
@@ -49,14 +51,13 @@ def generate_config_from_data(data: dict) -> MechanismConfig:
     """
     for key in data:
         if key not in [field.name for field in fields(MechanismConfig)]:
-            print(f"Error: Config contained unexpected field `{key}`", file=sys.stdout)
+            print_err(f"Config contained unexpected field `{key}`")
             sys.exit(1)
 
     for field in fields(MechanismConfig):
         if field.name not in data:
-            print(
-                f"Error: Config missing field `{field.name}`",
-                file=sys.stdout,
+            print_err(
+                f"Config missing field `{field.name}`",
             )
             sys.exit(1)
 
@@ -79,10 +80,10 @@ def load_json_config(config_path: str) -> MechanismConfig:
         with open(config_path, "r", encoding="utf-8") as config_file:
             data = json.load(config_file)
     except FileNotFoundError:
-        print(f"Error: Specified config file {config_path} does not exist.")
+        print_err(f"Specified config file {config_path} does not exist.")
         sys.exit(1)
     except json.JSONDecodeError:
-        print(f"Error: Invalid JSON format in {config_path}")
+        print_err(f"Invalid JSON format in {config_path}")
         sys.exit(1)
 
     return generate_config_from_data(data)
@@ -94,11 +95,22 @@ def validate_config(config: MechanismConfig) -> None:
     """
 
     if config.lead_motor not in config.motors:
-        print(
-            f"Error in `{config.name}` config: `lead_motor` must be one of the motors listed in `motors`"  # pylint: disable=line-too-long
+        print_err(
+            f"`{config.name}` config: `lead_motor` must be one of the motors listed in `motors`"  # pylint: disable=line-too-long
         )
 
         print(
             f"  Found `{config.lead_motor}` but expected one of {', '.join(['`' + motor + '`' for motor in config.motors])}"  # pylint: disable=line-too-long
         )
+        sys.exit(1)
+
+    if len(config.motors) != len(set(config.motors)):
+        motors_seen: set[str] = set()
+
+        for motor in config.motors:
+            if motor not in motors_seen:
+                motors_seen.add(motor)
+            else:
+                print_err(f"`{config.name}` config: Duplicate motor {motor}")
+
         sys.exit(1)

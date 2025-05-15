@@ -4,7 +4,8 @@ Handles creation of a jinja2 environment and the definitions of custom filters.
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from robotvibecoder import constants
+from robotvibecoder import cli
+from robotvibecoder.cli import print_err
 
 
 def article(word: str) -> str:
@@ -62,9 +63,9 @@ def hash_can_id(device: str) -> str:
     if device not in GlobalTemplateState.can_id_map:
         next_id = GlobalTemplateState.new_id()
         GlobalTemplateState.can_id_map[device] = next_id
-        print(f"  {constants.Colors.fg_green}➜{constants.Colors.reset} ", end="")
+        print(f"  {cli.Colors.fg_green}➜{cli.Colors.reset} ", end="")
         print(
-            f"Mapped device {constants.Colors.fg_cyan}{device}{constants.Colors.reset} to placeholder CAN ID {constants.Colors.fg_cyan}{next_id}{constants.Colors.reset}"  # pylint: disable=line-too-long
+            f"Mapped device {cli.Colors.fg_cyan}{device}{cli.Colors.reset} to placeholder CAN ID {cli.Colors.fg_cyan}{next_id}{cli.Colors.reset}"  # pylint: disable=line-too-long
         )
 
     return str(GlobalTemplateState.can_id_map[device])
@@ -80,8 +81,8 @@ def pos_dimension(kind: str) -> str:
         return "Distance"
 
     # Flywheels won't have a position
-    print(
-        f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_dimension."  # pylint: disable=line-too-long
+    print_err(
+        f"Invalid kind {kind} passed to pos_dimension."  # pylint: disable=line-too-long
     )
     print(
         "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
@@ -108,8 +109,8 @@ def pos_unit(kind: str) -> str:
     if kind == "Elevator":
         return "Meters"
 
-    print(
-        f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to pos_unit."  # pylint: disable=line-too-long
+    print_err(
+        f"Invalid kind {kind} passed to pos_unit."  # pylint: disable=line-too-long
     )
     print(
         "This is a robotvibecoder issue, NOT user error. Please report this on github!"
@@ -141,9 +142,7 @@ def goal(kind: str) -> str:
     if kind == "Flywheel":
         return "Speed"
 
-    print(
-        f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to goal."  # pylint: disable=line-too-long
-    )
+    print_err(f"Invalid kind {kind} passed to goal.")  # pylint: disable=line-too-long
     print(
         "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
     )
@@ -164,9 +163,7 @@ def goal_dimension(kind: str) -> str:
     if kind == "Flywheel":
         return "AngularVelocity"
 
-    print(
-        f"{constants.Colors.fg_red}Error:{constants.Colors.reset} Invalid kind {kind} passed to goal_dimension."  # pylint: disable=line-too-long
-    )
+    print_err(f"Invalid kind {kind} passed to goal_dimension.")
     print(
         "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
     )

@@ -8,6 +8,7 @@ import os
 import sys
 
 from robotvibecoder import constants
+import robotvibecoder.cli
 from robotvibecoder.config import MechanismConfig, MechanismKind
 
 
@@ -76,9 +77,10 @@ def new(args: Namespace) -> None:
     """
     config_path = os.path.join(args.folder, args.outfile)
 
-    print(f"[{constants.Colors.title_str}] Creating a new config file")
-    print(
-        f"  {constants.Colors.fg_red}{constants.Colors.bold}WARNING{constants.Colors.reset}: This will create/overwrite a file at `{constants.Colors.fg_cyan}{config_path}{constants.Colors.reset}`"  # pylint: disable=line-too-long
+    print(f"[{robotvibecoder.cli.Colors.title_str}] Creating a new config file")
+    print("  ", end="", file=sys.stderr)  # Indent the warning on the line below
+    robotvibecoder.cli.print_warning(
+        f"This will create/overwrite a file at `{robotvibecoder.cli.Colors.fg_cyan}{config_path}{robotvibecoder.cli.Colors.reset}`"  # pylint: disable=line-too-long
     )
     try:
         input("  Press Ctrl+C to cancel or [Enter] to continue")
@@ -92,6 +94,6 @@ def new(args: Namespace) -> None:
     else:
         config = constants.DEFAULT_CONFIG
 
-    print(f"[{constants.Colors.title_str}] Writing config file")
+    print(f"[{robotvibecoder.cli.Colors.title_str}] Writing config file")
     with open(config_path, "w+", encoding="utf-8") as outfile:
         json.dump(config.__dict__, fp=outfile, indent=2)

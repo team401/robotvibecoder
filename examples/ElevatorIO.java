@@ -81,6 +81,9 @@ public interface ElevatorIO {
     /** The voltage currently applied to the motors */
     public MutVoltage elevatorAppliedVolts = Volts.mutable(0.0);
 
+    /** The current closed-loop output from Motion Magic */
+    public double elevatorClosedLoopOutput = 0.0;
+
     /** Contribution of the p-term to motor output */
     public MutVoltage pContrib = Volts.mutable(0.0);
 

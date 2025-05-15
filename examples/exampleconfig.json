@@ -3,10 +3,7 @@
   "name": "Elevator",
   "kind": "Elevator",
   "canbus": "canivore",
-  "motors": [
-    "leadMotor",
-    "followerMotor"
-  ],
+  "motors": ["leadMotor", "followerMotor"],
   "lead_motor": "leadMotor",
   "encoder": "elevatorEncoder"
 }

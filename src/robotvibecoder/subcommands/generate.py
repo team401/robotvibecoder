@@ -7,7 +7,8 @@ import json
 import os
 import sys
 
-from robotvibecoder import constants
+from robotvibecoder import cli
+from robotvibecoder.cli import print_err, print_warning
 from robotvibecoder.config import (
     MechanismConfig,
     MechanismKind,
@@ -29,12 +30,12 @@ def generate(args: Namespace) -> None:
         config: MechanismConfig = generate_config_from_data(data)
     else:
         if args.config is None:
-            print(
-                "Error: Config not specified: Either --stdin or --config [file] must be supplied to command."  # pylint: disable=line-too-long
+            print_err(
+                "Config not specified: Either --stdin or --config [file] must be supplied to command."  # pylint: disable=line-too-long
             )
             sys.exit(1)
         config_path = os.path.join(args.folder, args.config)
-        print(f"[{constants.Colors.title_str}] Reading config file at {config_path}")
+        print(f"[{cli.Colors.title_str}] Reading config file at {config_path}")
         config = load_json_config(config_path)
 
     validate_config(config)
@@ -53,8 +54,8 @@ def generate(args: Namespace) -> None:
     }
 
     if not args.stdin:
-        print(
-            f"{constants.Colors.fg_red}{constants.Colors.bold}WARNING{constants.Colors.reset}: This will create/overwrite files at the following paths:"  # pylint: disable=line-too-long
+        print_warning(
+            "This will create/overwrite files at the following paths:"  # pylint: disable=line-too-long
         )
         for file_template, file_output in template_to_output_map.items():
             output_path = os.path.join(
@@ -75,12 +76,12 @@ def generate(args: Namespace) -> None:
         if os.path.exists(output_path) and args.stdin:
             # stdin mode skips the warning prompt at the start, so files would
             # be destroyed, necessitating this check
-            print(
-                f"Error: File {output_path} already exists. Please move/delete it and retry"
+            print_err(
+                f"File {output_path} already exists. Please move/delete it and retry"
             )
             sys.exit(1)
 
-        print(f"{constants.Colors.fg_cyan}➜{constants.Colors.reset} {output_path}")
+        print(f"{cli.Colors.fg_cyan}➜{cli.Colors.reset} {output_path}")
         template_path = file_template
         template = env.get_template(template_path)
 
