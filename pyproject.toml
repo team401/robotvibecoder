@@ -35,6 +35,9 @@ robotvibecoder = "robotvibecoder.main:main"
 [tool.hatch.version]
 source = "versioningit"
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.envs.types]
 extra-dependencies = ["mypy>=1.0.0"]
 [tool.hatch.envs.types.scripts]

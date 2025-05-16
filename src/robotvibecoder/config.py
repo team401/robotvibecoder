@@ -9,6 +9,7 @@ from dataclasses import dataclass, fields
 from enum import Enum
 import json
 import sys
+from typing import Union
 
 from robotvibecoder.cli import print_err
 
@@ -23,6 +24,22 @@ class MechanismKind(str, Enum):
     ARM = "Arm"
     ELEVATOR = "Elevator"
     FLYWHEEL = "Flywheel"
+
+    @staticmethod
+    def try_into(value: str) -> Union["MechanismKind", None]:
+        """Try to parse a string into a MechanismKind.
+        Returns none if the string isn't a valid MechanismKind.
+
+        :param value: The string to convert
+        :type value: str
+        :return: A MechanismKind if value is a valid Mechanism Kind, otherwise none
+        :rtype: MechanismKind | None
+        """
+        for kind in MechanismKind:
+            if value == kind:
+                return kind
+
+        return None
 
 
 @dataclass

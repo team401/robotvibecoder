@@ -1,0 +1,13 @@
+{
+  "package": "subsystems.test",
+  "name": "Test",
+  "kind": "Elevator",
+  "canbus": "canivore",
+  "motors": [
+    "Beans",
+    "Beans",
+    "Beans"
+  ],
+  "lead_motor": "Beans",
+  "encoder": "Beans"
+}
