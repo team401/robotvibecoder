@@ -29,11 +29,14 @@ def new_config_interactive() -> MechanismConfig:
 
     print("Kind: Should be either 'Elevator', 'Arm', or 'Flywheel'")
     kind: str = ""
-    while kind not in MechanismKind:
+    while MechanismKind.try_into(kind) is None:
         kind = input("> ")
-        if kind not in MechanismKind:
+        if MechanismKind.try_into(kind) is None:
             print("Please input either Elevator, Arm, or Flywheel.")
-    kind_enum: MechanismKind = MechanismKind[kind]
+    kind_try = MechanismKind.try_into(kind)
+    kind_enum: MechanismKind = (
+        kind_try if kind_try is not None else MechanismKind.ELEVATOR
+    )
 
     print("CAN Bus: whatever the name of the mechanism's bus is (e.g. `canivore`)")
     canbus: str = input("> ")
