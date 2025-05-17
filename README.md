@@ -1,5 +1,9 @@
 # robotvibecoder
 
+[![PyPI - Version](https://img.shields.io/pypi/v/robotvibecoder?color=blue)](https://pypi.org/project/robotvibecoder/)
+
+
+
 Automatically generate code stubs for mechanisms in FRC Robot Code. This project leverages WPILib, AdvantageKit, and CTRE's Phoenix-6 library to automatically generate boilerplate complete with hardware IO abstraction and simulation. RobotVibeCoder supports 3 mechanism types: elevators, single jointed arms, and flywheels.
 
 ---
