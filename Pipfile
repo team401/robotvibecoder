@@ -10,6 +10,8 @@ mypy = "*"
 pylint = "*"
 pick = "*"
 prompt-toolkit = "*"
+jsonschema = "*"
+types-jsonschema = "*"
 
 [dev-packages]
 

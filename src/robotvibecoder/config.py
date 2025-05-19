@@ -5,16 +5,19 @@ Houses the MechanismConfig class, a dataclass for describing mechanisms.
 Also contains utils for loading and generating configs.
 """
 
-from dataclasses import dataclass, fields
-from enum import Enum
+from dataclasses import dataclass
+from enum import StrEnum
 import json
+import re
 import sys
 from typing import Union
 
+
+from jsonschema import ValidationError, validate
 from robotvibecoder.cli import print_err
 
 
-class MechanismKind(str, Enum):
+class MechanismKind(StrEnum):
     """
     An enum for different types of mechanisms: arms, elevators, or flywheels
 
@@ -24,6 +27,7 @@ class MechanismKind(str, Enum):
     ARM = "Arm"
     ELEVATOR = "Elevator"
     FLYWHEEL = "Flywheel"
+    INDEXER = "Indexer"
 
     @staticmethod
     def try_into(value: str) -> Union["MechanismKind", None]:
@@ -42,11 +46,40 @@ class MechanismKind(str, Enum):
         return None
 
 
+class LimitSensingMethod(StrEnum):
+    """
+    An enum for different ways to detect that an indexer should stop
+    """
+
+    CURRENT = "Current"
+    CANRANGE = "CANrange"
+    CANDI = "CANdi"
+
+    @staticmethod
+    def try_into(value: str) -> Union["LimitSensingMethod", None]:
+        """Try to parse a string into a LimitSensingMethod.
+        Returns none if the string isn't a valid LimitSensingMethod.
+
+        :param value: The string to convert
+        :type value: str
+        :return: A LimitSensingMethod if value is a valid LimitSensingMethod, otherwise none
+        :rtype: LimitSensingMethod | None
+        """
+        for kind in LimitSensingMethod:
+            if value == kind:
+                return kind
+
+        return None
+
+
 @dataclass
 class MechanismConfig:
     """
     A dataclass to represent JSON configs. This dataclass is 1:1 with a config JSON file.
     """
+
+    # pylint: disable=too-many-instance-attributes
+    # This class has a lot of attributes; it's supposed to describe a whole mechanism in one object
 
     package: str
     name: str
@@ -54,7 +87,56 @@ class MechanismConfig:
     canbus: str
     motors: list[str]
     lead_motor: str
-    encoder: str
+    encoder: str = ""
+    limit_sensing_method: LimitSensingMethod = LimitSensingMethod.CANRANGE
+
+
+CONFIG_SCHEMA = {
+    "title": "MechanismConfig",
+    "description": "A configuration for a RobotVibeCoder mechanism",
+    "type": "object",
+    "properties": {
+        "package": {"type": "string"},
+        "name": {"type": "string"},
+        "kind": {"type": "string", "enum": list(MechanismKind)},
+        "canbus": {"type": "string"},
+        "motors": {"type": "array", "items": {"type": "string"}},
+        "lead_motor": {"type": "string"},
+    },
+    "required": ["package", "name", "canbus", "motors", "lead_motor"],
+    "allOf": [
+        {
+            "if": {
+                "properties": {"kind": {"pattern": "Elevator|Arm"}},
+                "required": ["kind"],
+            },
+            "then": {
+                "properties": {
+                    "encoder": {
+                        "type": "string",
+                    }
+                },
+                "required": ["encoder"],
+            },
+        },
+        {
+            "if": {
+                "properties": {"kind": {"const": "Indexer"}},
+                "required": ["kind"],
+            },
+            "then": {
+                "properties": {
+                    "limit_sensing_method": {
+                        "type": "string",
+                        "enum": list(LimitSensingMethod),
+                    }
+                },
+                "required": ["properties"],
+            },
+        },
+    ],
+    "unevaluatedProperties": False,
+}
 
 
 def generate_config_from_data(data: dict) -> MechanismConfig:
@@ -66,17 +148,29 @@ def generate_config_from_data(data: dict) -> MechanismConfig:
     :return: A MechanismConfig generated from the dict
     :rtype: MechanismConfig
     """
-    for key in data:
-        if key not in [field.name for field in fields(MechanismConfig)]:
-            print_err(f"Config contained unexpected field `{key}`")
-            sys.exit(1)
 
-    for field in fields(MechanismConfig):
-        if field.name not in data:
-            print_err(
-                f"Config missing field `{field.name}`",
+    try:
+        validate_json_config(data)
+    except ValidationError as e:
+        if e.validator == "unevaluatedProperties":
+            # Manually calculate the additional properties because jsonschema doesn't expose it
+            result = re.search(
+                r"Unevaluated properties are not allowed \((.*) was unexpected\)",
+                e.message,
             )
-            sys.exit(1)
+
+            field: str = (
+                result.group(1) if result is not None else e.message
+            )  # Safeguard against match fails
+
+            print_err(f"Config contained unexpected field(s): {field}")
+        else:
+            print_err(f"{e.validator}: {e.message}")
+        sys.exit(1)
+
+    # print_err(f"Config contained unexpected field `{key}`")
+
+    # print_err(f"Config missing field `{field.name}`")
 
     config: MechanismConfig = MechanismConfig(**data)
 
@@ -106,9 +200,23 @@ def load_json_config(config_path: str) -> MechanismConfig:
     return generate_config_from_data(data)
 
 
+def validate_json_config(config: dict) -> None:
+    """
+    Validate a JSON config against the config schema and print any errors if they are found
+
+    :param config: The JSON config object to validate
+    :type config: dict
+    """
+
+    validate(config, CONFIG_SCHEMA)
+
+
 def validate_config(config: MechanismConfig) -> None:
     """
     Validate a config and print any errors if they are found
+
+    :param config: The config to validate
+    :type config: MechanismConfig
     """
 
     if config.lead_motor not in config.motors:
