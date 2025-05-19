@@ -27,12 +27,9 @@ def new_config_interactive() -> MechanismConfig:
     )
     name: str = input("> ")
 
-    print("Kind: Should be either 'Elevator', 'Arm', or 'Flywheel'")
-    kind: str = ""
-    while MechanismKind.try_into(kind) is None:
-        kind = input("> ")
-        if MechanismKind.try_into(kind) is None:
-            print("Please input either Elevator, Arm, or Flywheel.")
+    kind_choices = ["Elevator", "Arm", "Flywheel"]
+    kind: str = robotvibecoder.cli.rvc_pick(kind_choices, "Mechanism Kind:")
+
     kind_try = MechanismKind.try_into(kind)
     kind_enum: MechanismKind = (
         kind_try if kind_try is not None else MechanismKind.ELEVATOR
@@ -57,15 +54,9 @@ def new_config_interactive() -> MechanismConfig:
             input(f"Motor {i + 1} name: a camelcase motor name (e.g. leadMotor)\n> ")
         )
 
-    lead_motor: str = ""
-
-    while lead_motor not in motors:
-        lead_motor = input("Lead motor (must be one of previously defined motors)\n> ")
-
-        if lead_motor not in motors:
-            print("Please select one of the previously defined motors:")
-            for motor in motors:
-                print(f" - {motor}")
+    lead_motor: str = robotvibecoder.cli.rvc_pick(
+        motors, "Lead Motor: (Up/Down/K/J to move, Enter to select)"
+    )
 
     encoder: str = input("Encoder name: a camelcase encoder name (e.g. armEncoder)\n> ")
 

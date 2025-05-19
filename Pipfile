@@ -8,6 +8,7 @@ jinja2 = "*"
 robotvibecoder = {file = ".", editable = true}
 mypy = "*"
 pylint = "*"
+pick = "*"
 
 [dev-packages]
 
