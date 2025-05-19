@@ -6,10 +6,30 @@ from argparse import Namespace
 import json
 import os
 import sys
+from prompt_toolkit import prompt
+from prompt_toolkit.completion import Completer, Completion
 
 from robotvibecoder import constants
 import robotvibecoder.cli
 from robotvibecoder.config import MechanismConfig, MechanismKind
+
+
+class AppendCompleter(Completer):
+    """
+    An auto-completer that adds a string to the end of the input text.
+    """
+
+    def __init__(self, text: str):
+        """
+        Create an AppendCompleter
+
+        :param text: The text to suggest completing
+        :type text: str
+        """
+        self.text = text
+
+    def get_completions(self, document, complete_event):
+        yield Completion(self.text, start_position=0)
 
 
 def new_config_interactive() -> MechanismConfig:
@@ -21,11 +41,11 @@ def new_config_interactive() -> MechanismConfig:
         "Interactively generating new config. Please enter each field and press [Enter]."
     )
     print("Package: will come after frc.robot (e.g. `subsystems.scoring`)")
-    package: str = input("> ")
+    package: str = prompt("> ", default="subsystems.")
     print(
         "Name: should be capitalized and should not end in Mechanism or Subsystem, as this is automatically added"  # pylint: disable=line-too-long
     )
-    name: str = input("> ")
+    name: str = prompt("> ")
 
     kind_choices = ["Elevator", "Arm", "Flywheel"]
     kind: str = robotvibecoder.cli.rvc_pick(kind_choices, "Mechanism Kind:")
@@ -36,7 +56,7 @@ def new_config_interactive() -> MechanismConfig:
     )
 
     print("CAN Bus: whatever the name of the mechanism's bus is (e.g. `canivore`)")
-    canbus: str = input("> ")
+    canbus: str = prompt("> ", default="canivore")
 
     num_motors: int = -1
     while num_motors == -1:
@@ -51,14 +71,22 @@ def new_config_interactive() -> MechanismConfig:
     motors: list[str] = []
     for i in range(num_motors):
         motors.append(
-            input(f"Motor {i + 1} name: a camelcase motor name (e.g. leadMotor)\n> ")
+            prompt(
+                f"Motor {i + 1} name: a camelcase motor name (e.g. leadMotor)\n> ",
+                completer=AppendCompleter("Motor"),
+                complete_while_typing=True,
+            )
         )
 
     lead_motor: str = robotvibecoder.cli.rvc_pick(
         motors, "Lead Motor: (Up/Down/K/J to move, Enter to select)"
     )
 
-    encoder: str = input("Encoder name: a camelcase encoder name (e.g. armEncoder)\n> ")
+    encoder: str = prompt(
+        "Encoder name: a camelcase encoder name (e.g. armEncoder)\n> ",
+        completer=AppendCompleter("Encoder"),
+        complete_while_typing=True,
+    )
 
     return MechanismConfig(
         package, name, kind_enum, canbus, motors, lead_motor, encoder

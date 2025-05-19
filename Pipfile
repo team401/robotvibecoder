@@ -9,6 +9,7 @@ robotvibecoder = {file = ".", editable = true}
 mypy = "*"
 pylint = "*"
 pick = "*"
+prompt-toolkit = "*"
 
 [dev-packages]
 

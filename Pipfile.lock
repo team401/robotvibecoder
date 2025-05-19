@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "52c30939ab41d079a4f6f5f78ca8db8f30ea9ee1c15940f228eac5697e90f210"
+            "sha256": "dbfed6ea191866e725c8f01e3307aed3875f497ee82733a96089e9b89bbcd8fc"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -188,6 +188,15 @@
             "markers": "python_version >= '3.9'",
             "version": "==4.3.7"
         },
+        "prompt-toolkit": {
+            "hashes": [
+                "sha256:52742911fde84e2d423e2f9a4cf1de7d7ac4e51958f648d9540e0fb8db077b07",
+                "sha256:931a162e3b27fc90c86f1b48bb1fb2c528c2761475e57c9c06de13311c7b54ed"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==3.0.51"
+        },
         "pylint": {
             "hashes": [
                 "sha256:8b7c2d3e86ae3f94fb27703d521dd0b9b6b378775991f504d7c3a6275aa0a6a6",
@@ -216,6 +225,13 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==4.13.2"
+        },
+        "wcwidth": {
+            "hashes": [
+                "sha256:3da69048e4540d84af32131829ff948f1e022c1c6bdb8d6102117aac784f6859",
+                "sha256:72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"
+            ],
+            "version": "==0.2.13"
         },
         "windows-curses": {
             "hashes": [
