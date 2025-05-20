@@ -1,0 +1,75 @@
+package frc.robot.subsystems.scoring;
+
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
+import coppercore.parameter_tools.LoggedTunableNumber;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import frc.robot.TestModeManager;
+import frc.robot.constants.JsonConstants;
+import frc.robot.subsystems.scoring.states.IntakeState;
+import org.littletonrobotics.junction.Logger;
+
+public class {{ name }}Mechanism {
+  private {{ name }}IO io;
+  private {{ name }}InputsAutoLogged inputs = new {{ name }}InputsAutoLogged();
+  private {{ name }}OutputsAutoLogged outputs = new {{ name }}OutputsAutoLogged();
+
+  private LoggedTunableNumber manualTuningVolts;
+
+  public {{ name }}Mechanism({{ name }}IO io) {
+    manualTuningVolts = new LoggedTunableNumber("{{ name }}Tunables/clawManualVolts", 0.0);
+
+    this.io = io;
+  }
+
+  /**
+   * Return the {{ name }}Mechanism's {{ name }}IO instance
+   *
+   * <p>NOTE: Be careful to only call methods from where they're allowed to be called (according to IO method docstrings)!
+   *
+   * @return a {{ name }}IO
+   */
+  public {{ name }}IO getIO() {
+    return io;
+  }
+
+  /**
+   * This method must be called from the subsystem's periodic! Mechanism periodics don't run
+   * automatically!
+   */
+  public void periodic() {
+    io.updateInputs(inputs);
+    io.applyOutputs(outputs);
+
+    Logger.processInputs("{{ name|lowerfirst }}/inputs", inputs);
+    Logger.processInputs("{{ name|lowerfirst }}/outputs", outputs);
+  }
+
+  /** This method must be called from the subsystem's test periodic! */
+  public void testPeriodic() {
+    switch (TestModeManager.getTestMode()) {
+      case {{ name }}Tuning:
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            (volts) -> {
+              io.setVoltage(Volts.of(volts[0]));
+            },
+            manualTuningVolts);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Check whether the {{ name }} currently detects a {{ game_piece }}
+   *
+   * @return True if detected, false if not
+   */
+  public boolean is{{ game_piece }}Detected() {
+    return inputs.{{ game_piece|lowerfirst }}Detected;
+  }
+}

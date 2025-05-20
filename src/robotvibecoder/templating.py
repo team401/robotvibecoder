@@ -2,6 +2,10 @@
 Handles creation of a jinja2 environment and the definitions of custom filters.
 """
 
+from __future__ import annotations
+
+from typing import ClassVar
+
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from robotvibecoder import cli
@@ -44,7 +48,7 @@ class GlobalTemplateState:  # pylint: disable=too-few-public-methods
     """
 
     last_id = 0  # This value is initialized to zero because it is incremented before being used
-    can_id_map: dict[str, int] = {}
+    can_id_map: ClassVar[dict[str, int]] = {}
 
     @staticmethod
     def new_id() -> int:
@@ -87,7 +91,9 @@ def pos_dimension(kind: str) -> str:
     print(
         "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
     )
-    raise ValueError(f"Invalid kind {kind} passed to pos_dimension")
+
+    msg = f"Invalid kind {kind} passed to pos_dimension"
+    raise ValueError(msg)
 
 
 def vel_dimension(kind: str) -> str:
@@ -115,7 +121,9 @@ def pos_unit(kind: str) -> str:
     print(
         "This is a robotvibecoder issue, NOT user error. Please report this on github!"
     )
-    raise ValueError(f"Invalid kind {kind} passed to pos_unit")
+
+    msg = f"Invalid kind {kind} passed to pos_unit"
+    raise ValueError(msg)
 
 
 def vel_unit(kind: str) -> str:
@@ -146,7 +154,9 @@ def goal(kind: str) -> str:
     print(
         "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
     )
-    raise ValueError(f"Invalid kind {kind} passed to goal filter")
+
+    msg = f"Invalid kind {kind} passed to goal filter"  # ruff EM102 https://docs.astral.sh/ruff/rules/f-string-in-exception/
+    raise ValueError(msg)
 
 
 def goal_dimension(kind: str) -> str:
@@ -167,7 +177,8 @@ def goal_dimension(kind: str) -> str:
     print(
         "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
     )
-    raise ValueError(f"Invalid kind {kind} passed to goal_dimension")
+    msg = f"Invalid kind {kind} passed to goal_dimension"  # ruff EM102, see https://docs.astral.sh/ruff/rules/f-string-in-exception/
+    raise ValueError(msg)
 
 
 def generate_env() -> Environment:

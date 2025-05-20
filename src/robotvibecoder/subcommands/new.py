@@ -105,14 +105,14 @@ def new_config_interactive() -> MechanismConfig:
     )
     if kind_enum in (MechanismKind.ELEVATOR, MechanismKind.ARM):
         return finish_elevator_arm_config_interactive(partial_config)
-    elif kind_enum == MechanismKind.INDEXER:
+    if kind_enum == MechanismKind.INDEXER:
         return finish_indexer_config_interactive(partial_config)
-    else:
-        robotvibecoder.cli.print_err(
-            f"Mechanism generation for kind {kind_enum} is not yet implemented."
-        )
-        print("  This is a robotvibecoder issue, not user error.")
-        sys.exit(1)
+
+    robotvibecoder.cli.print_err(
+        f"Mechanism generation for kind {kind_enum} is not yet implemented."
+    )
+    print("  This is a robotvibecoder issue, not user error.")
+    sys.exit(1)
 
 
 def finish_elevator_arm_config_interactive(
@@ -162,6 +162,13 @@ def finish_indexer_config_interactive(
         )
 
         partial_config.limit_switch_name = limit_switch_name
+
+    # TODO: Add 2026 game piece autocompletion once game releases # pylint:disable=fixme
+    limit_switch_name: str = prompt(
+        "Game piece: (e.g. Coral)\n> ",
+        completer=WordFinisherCompleter(["Coral", "Algae"]),
+        complete_while_typing=True,
+    )
 
     return partial_config
 

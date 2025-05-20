@@ -132,6 +132,7 @@ CONFIG_SCHEMA = {
                         "type": "string",
                         "enum": list(LimitSensingMethod),
                     },
+                    "game_piece": {"type": "string"},
                 },
                 "if": {
                     "properties": {
@@ -143,7 +144,7 @@ CONFIG_SCHEMA = {
                     "properties": {"limit_switch_name": {"type": "string"}},
                     "required": ["limit_switch_name"],
                 },
-                "required": ["limit_sensing_method"],
+                "required": ["limit_sensing_method", "game_piece"],
             },
         },
     ],

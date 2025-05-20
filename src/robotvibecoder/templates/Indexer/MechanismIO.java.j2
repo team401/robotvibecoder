@@ -1,0 +1,85 @@
+package frc.robot.subsystems.scoring;
+
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Volts;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutCurrent;
+import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.MutVoltage;
+import edu.wpi.first.units.measure.Voltage;
+import org.littletonrobotics.junction.AutoLog;
+
+public interface {{ name }}IO {
+  @AutoLog
+  public static class {{ name }}Inputs {
+    /**
+     * Whether or not the sensor detects a coral
+     *
+     * <p>This is left intentionally vague until we decide on CANrange vs. beam break vs. something
+     * else
+     */
+    public boolean {{ game_piece|lowerfirst }}Detected = false;
+{%- if limit_sensing_method == "CANrange" %}
+
+    public double {{ game_piece|lowerfirst }}SignalStrength = 0.0;
+    public MutDistance {{ game_piece|lowerfirst }}Distance = Meters.mutable(0.0);
+{%- %}
+{%- if limit_sensing_method != "Current" %}
+
+    public boolean {{ limit_switch_name }}Connected = false;
+{%- endif %}
+
+    public MutAngle {{ lead_motor }}Pos = Rotations.mutable(0.0);
+
+    /* Supply current of the {{ name }} motor */
+    public MutCurrent {{ lead_motor }}SupplyCurrent = Amps.mutable(0.0);
+
+    /* Stator current of the {{ name }} motor */
+    public MutCurrent {{ lead_motor }}StatorCurrent = Amps.mutable(0.0);
+  }
+
+  @AutoLog
+  public static class {{ name }}Outputs {
+    /** The voltage applied to the {{ lead_motor }} */
+    public MutVoltage {{ lead_motor }}AppliedVolts = Volts.mutable(0.0);
+  }
+
+  /**
+   * Updates a {{ name }}Inputs with the current information from sensors and motors.
+   *
+   * <p>Should be called by the {{ name }}Mechanism periodically
+   *
+   * @param inputs The {{ name }}Inputs to update with the latest information
+   */
+  public default void updateInputs({{ name }}Inputs inputs) {}
+
+  /**
+   * Applies requests to motors and updates a {{ name }}Outputs object with information about motor
+   * output.
+   *
+   * <p>Should be called by the {{ name }}Mechanism periodically
+   *
+   * @param outputs {{ name }}Outputs to update with the latest applied voltage.
+   */
+  public default void applyOutputs({{ name }}Outputs outputs) {}
+
+  /**
+   * Set the voltage to run the {{ name }} wheels
+   *
+   * @param volts The voltage to run the {{ name }} wheels at
+   */
+  public default void setVoltage(Voltage volts) {}
+
+  /**
+   * Get the current position of the {{ lead_motor }}
+   *
+   * @return An Angle, the current position of the roller motor as reported by the TalonFX
+   */
+  public default Angle get{{ leadMotor|upperfirst }}MotorPos() {
+    return Rotations.zero();
+  }
+}

@@ -1,0 +1,121 @@
+package frc.robot.subsystems.scoring;
+
+import static edu.wpi.first.units.Units.Volts;
+
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.ProximityParamsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANrange;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.MutVoltage;
+import edu.wpi.first.units.measure.Voltage;
+import frc.robot.constants.JsonConstants;
+
+public class ClawIOTalonFX implements ClawIO {
+{%- if limit_sensing_method != "Current" %}
+  {{ limit_sensing_method }} {{ limit_switch_name}} = new {{ limit_sensing_method }}({{ name }}Constants.synced.getObject().{{ limit_switch_name }}ID, "{{ canbus }}");
+
+{%- endif %}
+{%- for motor in motors %}
+  TalonFX {{ motor }} = new TalonFX({{ name }}Constants.synced.getObject().{{ motor }}ID, "{{ canbus }}");
+{%- endfor %}
+
+  private MutVoltage outputVoltage = Volts.mutable(0.0);
+  private VoltageOut voltageRequest = new VoltageOut(outputVoltage);
+
+  public ClawIOTalonFX() {
+    TalonFXConfiguration talonFXConfigs =
+        new TalonFXConfiguration()
+            .withMotorOutput(
+                new MotorOutputConfigs()
+                    .withInverted({{ name }}Constants.synced.getObject().k{{ lead_motor|upperfirst }}Inverted)
+                    .withNeutralMode(NeutralModeValue.Brake))
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withSupplyCurrentLimit({{ name }}Constants.synced.getObject().supplyCurrentLimit)
+                    .withStatorCurrentLimit({{ name }}Constants.synced.getObject().statorCurrentLimit));
+
+    {{ lead_motor }}.getConfigurator().apply(talonFXConfigs);
+{% for motor in motors %}
+{%- if motor != lead_motor %}
+
+    talonFXConfigs.MotorOutput.Inverted = {{ name }}Constants.synced.getObject().k{{ motor|upperfirst }}Inverted;
+    {{ motor }}.getConfigurator().apply(talonFXConfigs);
+{%- endif %}
+{%- endfor %}
+{%- if motors|length > 1 %}
+
+    talonFXConfigs.MotorOutput.Inverted = {{ name }}Constants.synced.getObject().k{{ leadMotor|upperfirst }}Inverted;
+{%- endif %}
+
+{%- if limit_sensing_method == "CANrange" %}
+    CANrangeConfiguration {{ limit_switch_name }}Configs =
+        new CANrangeConfiguration()
+            .withProximityParams(
+                new ProximityParamsConfigs()
+                    .withMinSignalStrengthForValidMeasurement(
+                        {{ name }}Constants.synced.getObject().{{ limit_switch_name }}MinSignalStrengthForValidMeasurement)
+                    .withProximityThreshold({{ name }}Constants.synced.getObject().{{ limit_switch_name }}ProximityThreshold)
+                    .withProximityHysteresis({{ name }}Constants.synced.getObject().{{ limit_switch_name }}ProximityHysteresis));
+
+    {{ limit_switch_name }}.getConfigurator().apply({{ limit_switch_name }}Configs);
+{%- endif %}
+  }
+
+  public void updateInputs(ClawInputs inputs) {
+    inputs.algaeDetected = isAlgaeDetected();
+    inputs.coralDetected = isCoralDetected();
+
+    inputs.algaeSignalStrength = algaeRange.getSignalStrength().getValueAsDouble();
+    inputs.algaeDistance.mut_replace(algaeRange.getDistance().getValue());
+
+    inputs.algaeRangeConnected =
+        algaeRange.isConnected()
+            && StatusSignal.isAllGood(
+                algaeRange.getIsDetected(),
+                algaeRange.getSignalStrength(),
+                algaeRange.getDistance());
+
+    inputs.coralSignalStrength = coralRange.getSignalStrength().getValueAsDouble();
+    inputs.coralDistance.mut_replace(coralRange.getDistance().getValue());
+
+    inputs.coralRangeConnected =
+        coralRange.isConnected()
+            && StatusSignal.isAllGood(
+                coralRange.getIsDetected(),
+                coralRange.getSignalStrength(),
+                coralRange.getDistance());
+
+    inputs.clawMotorPos.mut_replace({{ lead_motor }}.getPosition().getValue());
+
+    inputs.clawStatorCurrent.mut_replace({{ lead_motor }}.getStatorCurrent().getValue());
+    inputs.clawSupplyCurrent.mut_replace({{ lead_motor }}.getSupplyCurrent().getValue());
+  }
+
+  public void applyOutputs(ClawOutputs outputs) {
+    outputs.clawAppliedVolts.mut_replace(outputVoltage);
+    {{ lead_motor }}.setControl(voltageRequest.withOutput(outputVoltage));
+  }
+
+  public void setVoltage(Voltage volts) {
+    outputVoltage.mut_replace(volts);
+  }
+
+  public Angle getClawMotorPos() {
+    return {{ lead_motor }}.getPosition().getValue();
+  }
+
+  public boolean isCoralDetected() {
+    return coralRange.getIsDetected().getValue();
+  }
+
+  public boolean isAlgaeDetected() {
+    return algaeRange.getIsDetected().getValue();
+  }
+}
