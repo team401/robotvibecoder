@@ -2,9 +2,10 @@
 Utilities for printing warnings and errors and colors
 """
 
-from dataclasses import dataclass
 import sys
-from typing import TextIO, List
+from dataclasses import dataclass
+from typing import List, TextIO
+
 import pick
 
 
@@ -45,7 +46,7 @@ def print_warning(message: str, file: TextIO = sys.stderr):
     print(f"{Colors.fg_red}{Colors.bold}Warning{Colors.reset}: {message}", file=file)
 
 
-def rvc_pick(options: List[str], title: str, spoof_input: bool = True) -> str:
+def rvc_pick(options: List[str], title: str) -> str:
     """Make the user select an option from options using arrow keys/enter
 
     This is a custom wrapper around the pick library.
@@ -54,17 +55,15 @@ def rvc_pick(options: List[str], title: str, spoof_input: bool = True) -> str:
     :type options: list[str]
     :param title: The title message to print above the picker
     :type title: str
-    :param spoof_input: Print a prompt with the selected option? Defaults to true.
-    :type spoof_input: bool, optional
     """
 
     selection, _ = pick.pick(options, title)
-    assert isinstance(
-        selection, str
-    ), """Pick selection wasn't a string. This is a robotvibecoder issue!
-    Please report this on github: https://github.com/team401/robotvibecoder"""
+    if not isinstance(selection, str):
+        raise ValueError(
+            """Pick selection wasn't a string. This is a robotvibecoder issue!
+        Please report this on github: https://github.com/team401/robotvibecoder"""
+        )
 
-    if spoof_input:
-        print(f"{title}\n> {selection}")
+    print(f"{title}\n> {selection}")
 
     return selection

@@ -3,9 +3,10 @@ Houses the main entrypoint for RobotVibeCoder CLI and argument parsing
 """
 
 import argparse
+
 from robotvibecoder import cli
-from robotvibecoder.subcommands.new import new
 from robotvibecoder.subcommands.generate import generate
+from robotvibecoder.subcommands.new import new
 
 
 def main() -> None:

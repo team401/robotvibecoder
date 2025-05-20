@@ -2,10 +2,10 @@
 The 'generate' subcommand, for templating/generating a mechanism from a config
 """
 
-from argparse import Namespace
 import json
 import os
 import sys
+from argparse import Namespace
 
 from robotvibecoder import cli
 from robotvibecoder.cli import print_err, print_warning
@@ -45,12 +45,19 @@ def generate(args: Namespace) -> None:
     if config.kind == MechanismKind.FLYWHEEL:
         raise NotImplementedError("Flywheel Mechanisms are not implemented yet :(")
 
+    template_folder: str = ""
+
+    if config.kind in [MechanismKind.ARM, MechanismKind.ELEVATOR]:
+        template_folder = "ArmElevator"
+    elif config.kind == MechanismKind.INDEXER:
+        template_folder = "Indexer"
+
     template_to_output_map: dict[str, str] = {
-        "Mechanism.java.j2": "{name}Mechanism.java",
-        "MechanismIO.java.j2": "{name}IO.java",
-        "MechanismIOTalonFX.java.j2": "{name}IOTalonFX.java",
-        "MechanismConstants.java.j2": "{name}Constants.java",
-        config.kind + "Sim.java.j2": "{name}IOSim.java",
+        f"{template_folder}/Mechanism.java.j2": "{name}Mechanism.java",
+        f"{template_folder}/MechanismIO.java.j2": "{name}IO.java",
+        f"{template_folder}/MechanismIOTalonFX.java.j2": "{name}IOTalonFX.java",
+        f"{template_folder}/MechanismConstants.java.j2": "{name}Constants.java",
+        f"{template_folder}/" + config.kind + "Sim.java.j2": "{name}IOSim.java",
     }
 
     if not args.stdin:

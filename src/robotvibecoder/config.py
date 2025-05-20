@@ -5,15 +5,15 @@ Houses the MechanismConfig class, a dataclass for describing mechanisms.
 Also contains utils for loading and generating configs.
 """
 
-from dataclasses import dataclass
-from enum import StrEnum
 import json
 import re
 import sys
+from dataclasses import dataclass
+from enum import StrEnum
 from typing import Union
 
-
 from jsonschema import ValidationError, validate
+
 from robotvibecoder.cli import print_err
 
 
@@ -202,7 +202,7 @@ def load_json_config(config_path: str) -> MechanismConfig:
     :rtype: MechanismConfig
     """
     try:
-        with open(config_path, "r", encoding="utf-8") as config_file:
+        with open(config_path, encoding="utf-8") as config_file:
             data = json.load(config_file)
     except FileNotFoundError:
         print_err(f"Specified config file {config_path} does not exist.")

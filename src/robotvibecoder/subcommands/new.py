@@ -2,16 +2,17 @@
 Subcommand to generate a new config
 """
 
-from argparse import Namespace
 import json
 import os
 import sys
+from argparse import Namespace
 from typing import List
+
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import Completer, Completion
 
-from robotvibecoder import constants
 import robotvibecoder.cli
+from robotvibecoder import constants
 from robotvibecoder.config import LimitSensingMethod, MechanismConfig, MechanismKind
 
 

@@ -191,6 +191,7 @@ public class WristMechanism {
 
     Logger.recordOutput("Wrist/goalAngle", goalAngle);
   }
+
   /**
    * Sets the minimum and maximum allowed angles that the wrist may target.
    *
