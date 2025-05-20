@@ -89,6 +89,7 @@ class MechanismConfig:
     lead_motor: str
     encoder: str = ""
     limit_sensing_method: LimitSensingMethod = LimitSensingMethod.CANRANGE
+    limit_switch_name: str = ""
 
 
 CONFIG_SCHEMA = {
@@ -130,7 +131,17 @@ CONFIG_SCHEMA = {
                     "limit_sensing_method": {
                         "type": "string",
                         "enum": list(LimitSensingMethod),
-                    }
+                    },
+                },
+                "if": {
+                    "properties": {
+                        "limit_sensing_method": {"pattern": "CANdi|CANrange"},
+                    },
+                    "required": ["limit_sensing_method"],
+                },
+                "then": {
+                    "properties": {"limit_switch_name": {"type": "string"}},
+                    "required": ["limit_switch_name"],
                 },
                 "required": ["limit_sensing_method"],
             },
@@ -165,9 +176,10 @@ def generate_config_from_data(data: dict) -> MechanismConfig:
             )  # Safeguard against match fails
 
             print_err(f"Config contained unexpected field(s): {field}")
+        elif e.validator == "required":
+            print_err(f"Config missing required field: {e.message}")
         else:
             print_err(f"{e.validator}: {e.message}")
-            raise e
         sys.exit(1)
 
     # print_err(f"Config contained unexpected field `{key}`")

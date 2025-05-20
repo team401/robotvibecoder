@@ -7,5 +7,6 @@
     "intakeMotor"
   ],
   "lead_motor": "intakeMotor",
-  "limit_sensing_method": "CANdi"
+  "limit_sensing_method": "CANdi",
+  "limit_switch_name": "intakeCandi"
 }

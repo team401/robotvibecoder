@@ -78,7 +78,11 @@ This process would produce the following JSON config:
 
 ## Config file fields
 
-- ### `package`
+### Required fields
+
+These fields are always required in each config, regardless of mechanism kind.
+
+- #### `package`
 
   The package field is a string determining what package the resulting java files will be in. This should be lowercase, and starts after `frc.robot`. For example, the package string `subsystems.scoring` would add the following line to the top of the generated files:
 
@@ -86,32 +90,54 @@ This process would produce the following JSON config:
   package frc.robot.subsystems.scoring;
   ```
 
-- ### `name`
+- #### `name`
 
   The name field is a string determining the name of the mechanism. This should be capitalized, and should not end with "mechanism" or "subsystem". For instance, the name string `Elevator` would generate IOs named `ElevatorIO.java`, `ElevatorIOTalonFX.java`, etc.
 
-- ### `kind`
+- #### `kind`
 
   The kind field is a string determining what kind of mechanism to generate. This should be either `Arm`, `Elevator`, or `Flywheel`. The kind (named kind instead of type because type is a reserved keyword in python) determines what type of sim to generate:
   
   - `Arm`: [`SingleJointedArmSim`](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/SingleJointedArmSim.html)
   - `Elevator`: [`ElevatorSim`](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/ElevatorSim.html)
   - `Flywheel`: [`FlywheelSim`](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/FlywheelSim.html)
+  - `Indexer`: Rather than a physics sim, the Indexer Mechanism Kind aims to provide a simple indexing sim that can be integrated with [MapleSim](https://shenzhen-robotics-alliance.github.io/maple-sim/) later if necessary.
 
-  **Note**: Currently, `Arm` is the only mechanism kind that is supported. The other two mechanisms will be added over the next few days.
+  **Note**: Currently, `Flywheel` is not yet supported. It is under development and will be usable soon.
 
-- ### `canbus`
+- #### `canbus`
 
   The canbus field is a string field determining the name of the CAN bus that the devices will be on. For example, the default CAN bus when using a canivore is `canivore`
 
-- ### `motors`
+- #### `motors`
 
   The motors field is an array of strings defining the names of the motors of the mechanism. It is recommended for these names to be camel-cased (e.g. `leadMotor`). Each motor will be a field in the inputs object for whether or not it is connected, as well as fields for supply and stator current.
 
-- ### `lead_motor`
+- #### `lead_motor`
 
   The lead_motor field is a string determining which of these motors should be treated as the "lead motor". In TalonFX IOs, this motor will be commanded with the Closed-Loop request while all other motors are commanded with follower requests to follow the lead motor. This value must be one of `motors`.
 
-- ### `encoder`
+### Fields required by Elevators and Arms
+
+These fields must only be present when `kind` is `Elevator` or `Arm`.
+
+- #### `encoder`
 
   The encoder field is a string determining the name of the encoder that will be used for closed-loop control. This name is recommended for these names to be camel-cased (e.g. `armEncoder`). This field determines the name of the variable holding the encoder as well as its name in the IO objects.
+
+### Fields required by Indexers
+
+- #### `limit_sensing_method`
+
+  The method the indexer will use to detect when it has indexed a gamepiece and should become inactive.
+
+  This should be one of the following:
+
+    - `Current` - To intake, run the motors until their stator current rises above a threshold for a period of time
+    - `CANrange` - Use a CANrange as a limit switch
+    - `CANdi` - Use a CANdi as a limit switch
+
+- #### `limit_switch_name`
+
+  The name of the limit switch, which must be present if and only if `limit_sensing_method` is `CANrange` or `CANdi`.
+  

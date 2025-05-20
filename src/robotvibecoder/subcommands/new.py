@@ -6,6 +6,7 @@ from argparse import Namespace
 import json
 import os
 import sys
+from typing import List
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import Completer, Completion
 
@@ -30,6 +31,20 @@ class AppendCompleter(Completer):
 
     def get_completions(self, document, complete_event):
         yield Completion(self.text, start_position=0)
+
+
+class WordFinisherCompleter(Completer):
+    """
+    An auto-completer that suggests a word based on the last letter typed
+    """
+
+    def __init__(self, words: List[str]):
+        self.words: List[str] = words
+
+    def get_completions(self, document, complete_event):
+        for word in self.words:
+            if document.char_before_cursor == word[0]:
+                yield Completion(word[1:], display=word)
 
 
 def new_config_interactive() -> MechanismConfig:
@@ -137,6 +152,15 @@ def finish_indexer_config_interactive(
     )
 
     partial_config.limit_sensing_method = method_enum
+
+    if method_enum in [LimitSensingMethod.CANDI, LimitSensingMethod.CANRANGE]:
+        limit_switch_name: str = prompt(
+            "Limit switch name: a sensor name (e.g. coralRange)\n> ",
+            completer=WordFinisherCompleter(["Range", "Candi"]),
+            complete_while_typing=True,
+        )
+
+        partial_config.limit_switch_name = limit_switch_name
 
     return partial_config
 
