@@ -1,0 +1,11 @@
+{
+  "package": "subsystems.scoring",
+  "name": "Intake",
+  "kind": "Indexer",
+  "canbus": "canivore",
+  "motors": [
+    "intakeMotor"
+  ],
+  "lead_motor": "intakeMotor",
+  "limit_sensing_method": "CANdi"
+}

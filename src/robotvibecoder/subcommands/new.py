@@ -11,7 +11,7 @@ from prompt_toolkit.completion import Completer, Completion
 
 from robotvibecoder import constants
 import robotvibecoder.cli
-from robotvibecoder.config import MechanismConfig, MechanismKind
+from robotvibecoder.config import LimitSensingMethod, MechanismConfig, MechanismKind
 
 
 class AppendCompleter(Completer):
@@ -47,8 +47,10 @@ def new_config_interactive() -> MechanismConfig:
     )
     name: str = prompt("> ")
 
-    kind_choices = ["Elevator", "Arm", "Flywheel"]
-    kind: str = robotvibecoder.cli.rvc_pick(kind_choices, "Mechanism Kind:")
+    kind_choices = [kind.value for kind in MechanismKind]
+    kind: str = robotvibecoder.cli.rvc_pick(
+        kind_choices, "Mechanism Kind: (Up/Down/K/J to move, Enter to select)"
+    )
 
     kind_try = MechanismKind.try_into(kind)
     kind_enum: MechanismKind = (
@@ -82,15 +84,61 @@ def new_config_interactive() -> MechanismConfig:
         motors, "Lead Motor: (Up/Down/K/J to move, Enter to select)"
     )
 
+    partial_config = MechanismConfig(
+        package, name, kind_enum, canbus, motors, lead_motor
+    )
+    if kind_enum in (MechanismKind.ELEVATOR, MechanismKind.ARM):
+        return finish_elevator_arm_config_interactive(partial_config)
+    elif kind_enum == MechanismKind.INDEXER:
+        return finish_indexer_config_interactive(partial_config)
+    else:
+        robotvibecoder.cli.print_err(
+            f"Mechanism generation for kind {kind_enum} is not yet implemented."
+        )
+        print("  This is a robotvibecoder issue, not user error.")
+        sys.exit(1)
+
+
+def finish_elevator_arm_config_interactive(
+    partial_config: MechanismConfig,
+) -> MechanismConfig:
+    """
+    Given a config with all non-mechanism-kind-specific fields propagated, complete the config for
+    elevators and arms.
+    """
+
     encoder: str = prompt(
         "Encoder name: a camelcase encoder name (e.g. armEncoder)\n> ",
         completer=AppendCompleter("Encoder"),
         complete_while_typing=True,
     )
 
-    return MechanismConfig(
-        package, name, kind_enum, canbus, motors, lead_motor, encoder
+    partial_config.encoder = encoder
+
+    return partial_config
+
+
+def finish_indexer_config_interactive(
+    partial_config: MechanismConfig,
+) -> MechanismConfig:
+    """
+    Given a config with all non-mechanism-kind-specific fields propagated, complete the config for
+    indexers.
+    """
+
+    method_choices = [method.value for method in LimitSensingMethod]
+    method: str = robotvibecoder.cli.rvc_pick(
+        method_choices, "Limit Sensing Method: (Up/Down/K/J to move, Enter to select)"
     )
+
+    method_try = LimitSensingMethod.try_into(method)
+    method_enum: LimitSensingMethod = (
+        method_try if method_try is not None else LimitSensingMethod.CANDI
+    )
+
+    partial_config.limit_sensing_method = method_enum
+
+    return partial_config
 
 
 def new(args: Namespace) -> None:
@@ -118,4 +166,10 @@ def new(args: Namespace) -> None:
 
     print(f"[{robotvibecoder.cli.Colors.title_str}] Writing config file")
     with open(config_path, "w+", encoding="utf-8") as outfile:
-        json.dump(config.__dict__, fp=outfile, indent=2)
+        # Filter unused values out of config before writing
+        filtered_data = {}
+        for key in config.__dict__:
+            if config.__dict__[key] != "":
+                filtered_data[key] = config.__dict__[key]
+
+        json.dump(filtered_data, fp=outfile, indent=2)

@@ -92,6 +92,7 @@ class MechanismConfig:
 
 
 CONFIG_SCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "MechanismConfig",
     "description": "A configuration for a RobotVibeCoder mechanism",
     "type": "object",
@@ -131,7 +132,7 @@ CONFIG_SCHEMA = {
                         "enum": list(LimitSensingMethod),
                     }
                 },
-                "required": ["properties"],
+                "required": ["limit_sensing_method"],
             },
         },
     ],
@@ -166,6 +167,7 @@ def generate_config_from_data(data: dict) -> MechanismConfig:
             print_err(f"Config contained unexpected field(s): {field}")
         else:
             print_err(f"{e.validator}: {e.message}")
+            raise e
         sys.exit(1)
 
     # print_err(f"Config contained unexpected field `{key}`")
