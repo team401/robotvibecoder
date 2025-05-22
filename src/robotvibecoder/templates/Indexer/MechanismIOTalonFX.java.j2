@@ -29,6 +29,17 @@ public class ClawIOTalonFX implements ClawIO {
   private MutVoltage outputVoltage = Volts.mutable(0.0);
   private VoltageOut voltageRequest = new VoltageOut(outputVoltage);
 
+  {%- if limit_sensing_method == "CANrange" %}
+  private StatusSignal<Boolean> {{ limit_switch_name }}Detected = {{ limit_switch_name }}.getIsDetected();
+  {%- endif %}
+  {%- if limit_sensing_method == "CANdiS1" || limit_sensing_method == "CANdiS2" %}
+  private StatusSignal<Boolean> {{ limit_switch_name }}Closed = {{ limit_switch_name }}.get{{ limit_sensing_method|candi_signal}}Closed();
+  {%- endif %}
+  {%- for motor in motors %}
+  private StatusSignal<Current> {{ motor }}SupplyCurrent;
+  private StatusSignal<Current> {{ motor }}StatorCurrent;
+
+  {% endfor %}
   public ClawIOTalonFX() {
     TalonFXConfiguration talonFXConfigs =
         new TalonFXConfiguration()
@@ -36,6 +47,11 @@ public class ClawIOTalonFX implements ClawIO {
                 new MotorOutputConfigs()
                     .withInverted({{ name }}Constants.synced.getObject().k{{ lead_motor|upperfirst }}Inverted)
                     .withNeutralMode(NeutralModeValue.Brake))
+            {%- if limit_sensing_method != "Current" %}
+            .withHardwareLimitSwitch(
+              new HardwareLimitSwitchConfigs()
+                .withForwardLimitRemote{{ limit_sensing_method }}({{ limit_switch_name }}))
+            {%- endif %}
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withSupplyCurrentLimit({{ name }}Constants.synced.getObject().supplyCurrentLimit)
@@ -66,11 +82,32 @@ public class ClawIOTalonFX implements ClawIO {
 
     {{ limit_switch_name }}.getConfigurator().apply({{ limit_switch_name }}Configs);
 {%- endif %}
+{%- if limit_sensing_method == "CANdiS1" || limit_sensing_method == "CANdiS2" %}
+    CANdiConfiguration candiConfigs =
+      new CANdiConfiguration()
+        .withDigitalInputs(
+          new DigitalInputsConfigs()
+            .with{{ limit_sensing_method|candi_signal }}CloseState({{ limit_sensing_method|candi_signal }}CloseStateValue.CloseWhenHigh)
+            .with{{ limit_sensing_method|candi_signal }}FloatState({{ limit_sensing_method|candi_signal }}FloatStateValue.PullLow)
+        );
+{%- endif %}
+
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0,
+        {%- for motor in motors%}
+        {{ motor }}SupplyCurrent,
+        {{ motor }}StatorCurrent,
+        {%- endfor %}
+        {%- if limit_sensing_method == "CANrange" %}
+        {{ limit_switch_name }}Detected,
+        {%- endif %}
+        {%- if limit_sensing_method == "CANdiS1" || limit_sensing_method == "CANdiS2" %}
+        {{ limit_switch_name }}Closed,
+        {%- endif %}
+    );
   }
 
   public void updateInputs(ClawInputs inputs) {
-    inputs.algaeDetected = isAlgaeDetected();
-    inputs.coralDetected = isCoralDetected();
+    inputs.{{ game_piece|lowerfirst }}Detected = isAlgaeDetected();
 
     inputs.algaeSignalStrength = algaeRange.getSignalStrength().getValueAsDouble();
     inputs.algaeDistance.mut_replace(algaeRange.getDistance().getValue());

@@ -181,6 +181,14 @@ def goal_dimension(kind: str) -> str:
     raise ValueError(msg)
 
 
+def candi_signal(limit_sensing_method: str) -> str:
+    """
+    Given a limit_sensing_method (CANdiS1 or CANdiS2) return S1 or S2
+    """
+
+    return limit_sensing_method[-2:]
+
+
 def generate_env() -> Environment:
     """
     Generate a Jinja2 Environment using a PackageLoader loading from

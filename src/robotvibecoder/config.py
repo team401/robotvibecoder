@@ -53,7 +53,8 @@ class LimitSensingMethod(StrEnum):
 
     CURRENT = "Current"
     CANRANGE = "CANrange"
-    CANDI = "CANdi"
+    CANDIS1 = "CANdiS1"
+    CANDIS2 = "CANdiS2"
 
     @staticmethod
     def try_into(value: str) -> Union["LimitSensingMethod", None]:
@@ -136,7 +137,7 @@ CONFIG_SCHEMA = {
                 },
                 "if": {
                     "properties": {
-                        "limit_sensing_method": {"pattern": "CANdi|CANrange"},
+                        "limit_sensing_method": {"pattern": "CANdiS1|CANdiS2|CANrange"},
                     },
                     "required": ["limit_sensing_method"],
                 },
