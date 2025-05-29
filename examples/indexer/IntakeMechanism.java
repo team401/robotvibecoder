@@ -12,27 +12,27 @@ import frc.robot.constants.JsonConstants;
 import frc.robot.subsystems.scoring.states.IntakeState;
 import org.littletonrobotics.junction.Logger;
 
-public class {{ name }}Mechanism {
-  private {{ name }}IO io;
-  private {{ name }}InputsAutoLogged inputs = new {{ name }}InputsAutoLogged();
-  private {{ name }}OutputsAutoLogged outputs = new {{ name }}OutputsAutoLogged();
+public class IntakeMechanism {
+  private IntakeIO io;
+  private IntakeInputsAutoLogged inputs = new IntakeInputsAutoLogged();
+  private IntakeOutputsAutoLogged outputs = new IntakeOutputsAutoLogged();
 
   private LoggedTunableNumber manualTuningVolts;
 
-  public {{ name }}Mechanism({{ name }}IO io) {
-    manualTuningVolts = new LoggedTunableNumber("{{ name }}Tunables/{{ name|lowerfirst }}ManualVolts", 0.0);
+  public IntakeMechanism(IntakeIO io) {
+    manualTuningVolts = new LoggedTunableNumber("IntakeTunables/clawManualVolts", 0.0);
 
     this.io = io;
   }
 
   /**
-   * Return the {{ name }}Mechanism's {{ name }}IO instance
+   * Return the IntakeMechanism's IntakeIO instance
    *
    * <p>NOTE: Be careful to only call methods from where they're allowed to be called (according to IO method docstrings)!
    *
-   * @return a {{ name }}IO
+   * @return a IntakeIO
    */
-  public {{ name }}IO getIO() {
+  public IntakeIO getIO() {
     return io;
   }
 
@@ -44,14 +44,14 @@ public class {{ name }}Mechanism {
     io.updateInputs(inputs);
     io.applyOutputs(outputs);
 
-    Logger.processInputs("{{ name|lowerfirst }}/inputs", inputs);
-    Logger.processInputs("{{ name|lowerfirst }}/outputs", outputs);
+    Logger.processInputs("intake/inputs", inputs);
+    Logger.processInputs("intake/outputs", outputs);
   }
 
   /** This method must be called from the subsystem's test periodic! */
   public void testPeriodic() {
     switch (TestModeManager.getTestMode()) {
-      case {{ name }}Tuning:
+      case IntakeTuning:
         LoggedTunableNumber.ifChanged(
             hashCode(),
             (volts) -> {
@@ -65,28 +65,26 @@ public class {{ name }}Mechanism {
   }
 
   /**
-   * Check whether the {{ name }} currently detects a {{ game_piece }}
+   * Check whether the Intake currently detects a Coral
    *
    * @return True if detected, false if not
    */
-  public boolean is{{ game_piece }}Detected() {
-    return inputs.{{ game_piece|lowerfirst }}Detected;
+  public boolean isCoralDetected() {
+    return inputs.coralDetected;
   }
 
   /**
-   * Intake at a specified voltage until a {{ game_piece }} is detected.
+   * Intake at a specified voltage until a Coral is detected.
    * 
    * @param voltage A Voltage, the voltage to apply to the motors until that piece is detected.
    */
   public void intake(Voltage voltage) {
-    {%- if limit_sensing_method != "Current" %}
     io.setObeyLimitSwitch(true);
-    {%- endif %}
     io.setVoltage(voltage)
   }
 
   /**
-   * Run motors at a certain voltage, regardless of whether a {{ game_piece }} is detected.
+   * Run motors at a certain voltage, regardless of whether a Coral is detected.
    *
    * @param voltage A voltage, the voltage to apply to the motors until otherwise specified.
    */

@@ -21,6 +21,9 @@ public class ClawIOTalonFX implements ClawIO {
 {%- if limit_sensing_method != "Current" %}
   {{ limit_sensing_method }} {{ limit_switch_name}} = new {{ limit_sensing_method }}({{ name }}Constants.synced.getObject().{{ limit_switch_name }}ID, "{{ canbus }}");
 
+  /** Should the hardware limit switch be enabled currently */
+  private boolean obeyLimitSwitch = false;
+
 {%- endif %}
 {%- for motor in motors %}
   TalonFX {{ motor }} = new TalonFX({{ name }}Constants.synced.getObject().{{ motor }}ID, "{{ canbus }}");
@@ -32,7 +35,7 @@ public class ClawIOTalonFX implements ClawIO {
   {%- if limit_sensing_method == "CANrange" %}
   private StatusSignal<Boolean> {{ limit_switch_name }}Detected = {{ limit_switch_name }}.getIsDetected();
   {%- endif %}
-  {%- if limit_sensing_method == "CANdiS1" || limit_sensing_method == "CANdiS2" %}
+  {%- if limit_sensing_method == "CANdiS1" or limit_sensing_method == "CANdiS2" %}
   private StatusSignal<Boolean> {{ limit_switch_name }}Closed = {{ limit_switch_name }}.get{{ limit_sensing_method|candi_signal}}Closed();
   {%- endif %}
   {%- for motor in motors %}
@@ -82,7 +85,7 @@ public class ClawIOTalonFX implements ClawIO {
 
     {{ limit_switch_name }}.getConfigurator().apply({{ limit_switch_name }}Configs);
 {%- endif %}
-{%- if limit_sensing_method == "CANdiS1" || limit_sensing_method == "CANdiS2" %}
+{%- if limit_sensing_method == "CANdiS1" or limit_sensing_method == "CANdiS2" %}
     CANdiConfiguration candiConfigs =
       new CANdiConfiguration()
         .withDigitalInputs(
@@ -100,7 +103,7 @@ public class ClawIOTalonFX implements ClawIO {
         {%- if limit_sensing_method == "CANrange" %}
         {{ limit_switch_name }}Detected,
         {%- endif %}
-        {%- if limit_sensing_method == "CANdiS1" || limit_sensing_method == "CANdiS2" %}
+        {%- if limit_sensing_method == "CANdiS1" or limit_sensing_method == "CANdiS2" %}
         {{ limit_switch_name }}Closed,
         {%- endif %}
     );
@@ -136,8 +139,12 @@ public class ClawIOTalonFX implements ClawIO {
   }
 
   public void applyOutputs(ClawOutputs outputs) {
-    outputs.clawAppliedVolts.mut_replace(outputVoltage);
+    {%- if limit_sensing_method != "Current" %}
+    voltageRequest.withIgnoreHardwareLimits(!obeyLimitSwitch);
+{% endif %}
     {{ lead_motor }}.setControl(voltageRequest.withOutput(outputVoltage));
+
+    outputs.clawAppliedVolts.mut_replace({{ lead_motor }}.getMotorVoltage());
   }
 
   public void setVoltage(Voltage volts) {
@@ -155,4 +162,10 @@ public class ClawIOTalonFX implements ClawIO {
   public boolean isAlgaeDetected() {
     return algaeRange.getIsDetected().getValue();
   }
+  {%- if limit_sensing_method != "Current" %}
+
+  public void setObeyLimitSwitch(boolean obeyLimitSwitch) {
+    this.obeyLimitSwitch = obeyLimitSwitch;
+  }
+  {%- endif%}
 }

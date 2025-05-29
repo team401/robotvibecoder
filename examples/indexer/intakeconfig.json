@@ -7,6 +7,7 @@
     "intakeMotor"
   ],
   "lead_motor": "intakeMotor",
-  "limit_sensing_method": "CANdi",
-  "limit_switch_name": "intakeCandi"
+  "limit_sensing_method": "CANrange",
+  "limit_switch_name": "coralRange",
+  "game_piece": "Coral"
 }

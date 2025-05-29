@@ -27,7 +27,7 @@ public interface {{ name }}IO {
 
     public double {{ game_piece|lowerfirst }}SignalStrength = 0.0;
     public MutDistance {{ game_piece|lowerfirst }}Distance = Meters.mutable(0.0);
-{%- %}
+{%- endif %}
 {%- if limit_sensing_method != "Current" %}
 
     public boolean {{ limit_switch_name }}Connected = false;
@@ -79,7 +79,18 @@ public interface {{ name }}IO {
    *
    * @return An Angle, the current position of the roller motor as reported by the TalonFX
    */
-  public default Angle get{{ leadMotor|upperfirst }}MotorPos() {
+  public default Angle get{{ lead_motor|upperfirst }}MotorPos() {
     return Rotations.zero();
   }
+  {%- if limit_sensing_method != "Current" %}
+
+  /**
+   * Set whether or not the mechanism should obey its hardware limit switch.
+   * 
+   * <p> This should be enabled when intaking and disabled when ejecting.
+   *
+   * @param obeyLimitSwitch a boolean, true if the limit switch should be obeyed
+   */
+  public default void setObeyLimitSwitch(boolean obeyLimitSwitch) {}
+  {%- endif%}
 }

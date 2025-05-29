@@ -149,12 +149,16 @@ def finish_indexer_config_interactive(
 
     method_try = LimitSensingMethod.try_into(method)
     method_enum: LimitSensingMethod = (
-        method_try if method_try is not None else LimitSensingMethod.CANDI
+        method_try if method_try is not None else LimitSensingMethod.CANRANGE
     )
 
     partial_config.limit_sensing_method = method_enum
 
-    if method_enum in [LimitSensingMethod.CANDI, LimitSensingMethod.CANRANGE]:
+    if method_enum in [
+        LimitSensingMethod.CANDIS1,
+        LimitSensingMethod.CANDIS2,
+        LimitSensingMethod.CANRANGE,
+    ]:
         limit_switch_name: str = prompt(
             "Limit switch name: a sensor name (e.g. coralRange)\n> ",
             completer=WordFinisherCompleter(["Range", "Candi"]),
@@ -169,6 +173,8 @@ def finish_indexer_config_interactive(
         completer=WordFinisherCompleter(["Coral", "Algae"]),
         complete_while_typing=True,
     )
+
+    partial_config.game_piece = limit_switch_name
 
     return partial_config
 

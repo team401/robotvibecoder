@@ -91,6 +91,7 @@ class MechanismConfig:
     encoder: str = ""
     limit_sensing_method: LimitSensingMethod = LimitSensingMethod.CANRANGE
     limit_switch_name: str = ""
+    game_piece: str = ""
 
 
 CONFIG_SCHEMA = {
