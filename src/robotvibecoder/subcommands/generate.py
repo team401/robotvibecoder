@@ -10,6 +10,7 @@ from argparse import Namespace
 from robotvibecoder import cli
 from robotvibecoder.cli import print_err, print_warning
 from robotvibecoder.config import (
+    LimitSensingMethod,
     MechanismConfig,
     MechanismKind,
     generate_config_from_data,
@@ -44,6 +45,11 @@ def generate(args: Namespace) -> None:
 
     if config.kind == MechanismKind.FLYWHEEL:
         raise NotImplementedError("Flywheel Mechanisms are not implemented yet :(")
+    if (
+        config.kind == MechanismKind.INDEXER
+        and config.limit_sensing_method == LimitSensingMethod.CURRENT
+    ):
+        raise NotImplementedError("Current-based indexing is not yet supported :(")
 
     template_folder: str = ""
 
