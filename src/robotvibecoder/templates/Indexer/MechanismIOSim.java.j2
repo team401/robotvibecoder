@@ -1,4 +1,4 @@
-package frc.robot.subsystems.scoring;
+package frc.robot.{{ package }};
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Rotations;
@@ -12,52 +12,67 @@ import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.constants.JsonConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class ClawIOSim implements ClawIO {
-  private enum HasState {
-    NONE,
-    CORAL,
-    ALGAE
-  }
+public class {{ name }}IOSim implements {{ name }}IO {
+  private enum Action = {
+    None,
+    Intaking,
+    Ejecting,
+    Outtaking,
+  };
 
-  boolean hasCoral = true; // Initialize with a coral because of preload
-  boolean hasAlgae = false;
+  boolean has{{ game_piece|upperfirst }} = true; // TODO: Change this value to correctly reflect preloa
 
-  boolean coralSensed = true;
-  boolean algaeSensed = false;
-
-  boolean coralAvailable = false;
-  boolean algaeAvailable = false;
+  // Supplier to manage where the robot can intake in sim
+  private static BooleanSupplier {{ game_piece|upperfirst }}AvailableSupplier = () -> false;
+  // Callback for when a piece is ejected
+  private static Callable onEject = () -> {};
+  // Callback for when a piece is outtaked
+  private static Callable onOuttake = () -> {};
 
   private MutVoltage outputVoltage = Volts.mutable(0.0);
 
   /** Keep track of simulated motor position */
   private MutAngle motorPos = Rotations.mutable(0.0);
 
-  /**
-   * Keeps track of where a gamepiece is.
-   *
-   * <ul>
-   *   <li>When simulating coral, this value will be initialized to 0.0 and then move to 1.0, where
-   *       any value beyond 1.0 is dropping the coral.
-   *   <li>When simulating algae, this value will begin at 1.0 and be able to move back down to 0.0.
-   *       Moving it out to 1.0 will drop the algae.
-   *   <li>When not holding a gamepiece, this value will be -1.0.
-   * </ul>
-   */
-  private double piecePos = 0.8; // Init to 0.8 so that coral is detected
+  /* Timer for actions (intaking/outtaking/ejecting) */
+  private Timer actionTimer = new Timer();
 
-  // Keep track of what the claw is currently holding
-  private HasState has = HasState.CORAL;
+  private Action currentAction = Action.None;
+{%- if limit_sensing_method != "Current" %}
 
-  public ClawIOSim() {
-    SmartDashboard.putBoolean("clawSim/coralAvailable", false);
-    SmartDashboard.putBoolean("clawSim/algaeAvailable", false);
+  private {{ limit_sensing_method|limit_switch_kind }}SimState = {{ limit_switch_name }}.getSimState();
+{%- %}
 
+  public {{ name }}IOSim() {
     updateSimState();
+  }
+
+  /**
+   * Update the supplier that the {{ name }} sim uses to determine if it can currently intake.
+   */
+  public static void set{{ game_piece|upperfirst }}AvailableSupplier(BooleanSupplier newSupplier) {
+    {{ game_piece|lowerfirst }}AvailableSupplier = newSupplier;
+  }
+
+  /**
+   * Update the on-eject callback.
+   *
+   * <p> This Callable will be called whenever the {{ name }} ejects/backs out a {{ game_piece }}
+   */
+  public static void setOnEject(Callable newOnEject) {
+    onEject = newOnEject;
+  }
+
+  /**
+   * Update the on-outtake callback.
+   *
+   * <p> This Callable will be called whenever the {{ name }} outtakes/passes forward a {{ game_piece }}
+   */
+  public static void setOnOuttake(Callable newOnOuttake) {
+    onOuttake = newOnOuttake;
   }
 
   private void updateSimState() {
@@ -65,77 +80,78 @@ public class ClawIOSim implements ClawIO {
       outputVoltage.mut_replace(Volts.zero());
     }
 
-    boolean coralAvailable = SmartDashboard.getBoolean("clawSim/coralAvailable", false);
-    boolean algaeAvailable = SmartDashboard.getBoolean("clawSim/algaeAvailable", false);
+    boolean {{ game_piece|lowerfirst }}Available = {{ game_piece|lowerfirst }}AvailableSupplier.get();
 
     // v Volts * k Rotations/Second*Volt * s Seconds =  Rotations
     motorPos.mut_plus(
         RotationsPerSecond.of(
-                outputVoltage.in(Volts) * JsonConstants.clawConstantsSim.rotationsPerSecondPerVolt)
+                outputVoltage.in(Volts) * {{ name }}Constants.Sim.synced.getObject().rotationsPerSecondPerVolt)
             .times(Seconds.of(0.02)));
+    
+    if (has{{ game_piece|upperfirst }}) {
+      // If the {{ name }} currently has a {{ game_piece }}, check for eject/outtake
+      if (Math.signum(outputVoltage.in(Volts)) ==  {{ name }}Constants.Sim.synced.getObject().ejectSignum) {
+        if (currentAction != Action.Ejecting) {
+          currentAction = Action.Ejecting;
+          actionTimer.restart();
+        }
 
-    if (has == HasState.NONE) {
-      if (outputVoltage.in(Volts) < 0.0 && algaeAvailable) {
-        has = HasState.ALGAE;
-        piecePos = 1.0;
-      }
-      if (outputVoltage.in(Volts) > 0.0 && coralAvailable) {
-        has = HasState.CORAL;
-        piecePos = 0.0;
-      }
-    } else {
-      piecePos +=
-          RotationsPerSecond.of(
-                      outputVoltage.in(Volts)
-                          * JsonConstants.clawConstantsSim.rotationsPerSecondPerVolt)
-                  .times(Seconds.of(0.02))
-                  .in(Rotations)
-              * 0.05;
+        if (actionTimer.hasElapsed({{ name }}Constants.Sim.synced.getObject().ejectTimeSeconds)) {
+          currentAction = Action.None;
+          has{{ game_piece|upperfirst }} = false;
+          actionTimer.restart();
+          onEject.run();
+        }
+      } else if (Math.signum(outputVoltage.in(Volts)) ==  {{ name }}Constants.Sim.synced.getObject().outtakeSignum) {
+        if (currentAction != Action.Outtaking) {
+          currentAction = Action.Outtaking;
+          actionTimer.restart();
+        }
 
-      if (piecePos > 1.0) {
-        has = HasState.NONE;
-        piecePos = -1.0;
-      }
-
-      if (piecePos < 0.0) {
-        if (has == HasState.ALGAE) {
-          piecePos = 0.0;
-        } else if (has == HasState.CORAL) {
-          has = HasState.NONE;
-          piecePos = -1.0;
+        if (actionTimer.hasElapsed({{ name }}Constants.Sim.synced.getObject().outtakeTimeSeconds)) {
+          currentAction = Action.None;
+          has{{ game_piece|upperfirst }} = false;
+          actionTimer.restart();
+          onOuttake.run();
         }
       }
+    } else if (Math.signum(outputVoltage.in(Volts)) ==  {{ name }}Constants.Sim.synced.getObject().intakeSignum) {
+      if (currentAction != Action.Intaking) {
+        currentAction = Action.Intaking;
+        actionTimer.restart();
+      }
+
+      if (actionTimer.hasElapsed({{ name }}Constants.Sim.synced.getObject().intakeTimeSeconds)) {
+        currentAction = Action.None;
+        has{{ game_piece|upperfirst }} = true;
+        actionTimer.restart();
+      }
+    } else {
+      actionTimer.reset();
     }
+{%- if limit_sensing_method == "CANrange" %}
 
-    Logger.recordOutput("clawSim/outputVoltage", outputVoltage.in(Volts));
+    {{ limit_switch_name }}SimState.setDistance(
+      has{{ game_piece|upperfirst }}
+        ? {{ name }}Constants.Sim.synced.getObject().distanceWith{{ game_piece|upperfirst }}
+        : {{ name }}Constants.Sim.Synced.getObject().distanceWithoutObject);
+{%- endif %}
+{%- if limit_sensing_method == "CANdiS1" or limit_sensing_method == "CANdiS2" %}
+{%- set signal = limit_sensing_method|candi_signal %}
 
-    hasCoral = has == HasState.CORAL;
-    hasAlgae = has == HasState.ALGAE;
+    {{ limit_switch_name }}SimState.set{{ signal }}State(
+      has{{ game_piece|upperfirst}}
+        ? {{ signal }}StateValue.High
+        : {{ signal }}StateValue.Low);
+{%- endif %}
 
-    switch (has) {
-      case NONE:
-        coralSensed = false;
-        algaeSensed = false;
-        break;
-      case CORAL:
-        coralSensed = piecePos > JsonConstants.clawConstantsSim.coralDetectionPoint;
-        algaeSensed = false;
-        break;
-      case ALGAE:
-        algaeSensed = piecePos < JsonConstants.clawConstantsSim.algaeDetectionPoint;
-        coralSensed = false;
-        break;
-    }
-
-    Logger.recordOutput("clawSim/has", has);
-    Logger.recordOutput("clawSim/hasCoral", hasCoral);
-    Logger.recordOutput("clawSim/hasAlgae", hasAlgae);
-    Logger.recordOutput("clawSim/piecePos", piecePos);
+    Logger.recordOutput("{{ name|lowerfirst }}Sim/outputVoltage", outputVoltage.in(Volts));
+    Logger.recordOutput("{{ name|lowerfirst }}Sim/has{{ game_piece|upperfirst }}", has{{ game_piece|upperfirst }});
   }
 
   private final Current currentPushing = Amps.of(50);
 
-  public void updateInputs(ClawInputs inputs) {
+  public void updateInputs({{ name }}Inputs inputs) {
     updateSimState();
 
     inputs.algaeDetected = algaeSensed;
@@ -152,7 +168,7 @@ public class ClawIOSim implements ClawIO {
     inputs.clawSupplyCurrent.mut_replace(motorCurrent);
   }
 
-  public void applyOutputs(ClawOutputs outputs) {
+  public void applyOutputs({{ name }}Outputs outputs) {
     outputs.clawAppliedVolts.mut_replace(outputVoltage);
   }
 
@@ -160,7 +176,7 @@ public class ClawIOSim implements ClawIO {
     outputVoltage.mut_replace(volts);
   }
 
-  public Angle getClawMotorPos() {
+  public Angle get{{ name }}MotorPos() {
     return motorPos;
   }
 

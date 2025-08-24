@@ -1,4 +1,4 @@
-package frc.robot.constants;
+package frc.robot.{{ package }};
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Centimeters;
@@ -32,24 +32,17 @@ public class {{ name }}Constants {
   {%- endif%}
 
   {% for motor in motors %}
-  public final Integer {{ motor }}Id = {{ motor|hash_can_id }}; // TODO: Replace placeholder CAN ID
+  public final Integer {{ motor }}ID = {{ motor|hash_can_id }}; // TODO: Replace placeholder CAN ID
+  public final InvertedValue k{{ motor|upperfirst }}Inverted = InvertedValue.Clockwise_Positive;
   {%- endfor %}
-
-  {%- for motor in motors%}
-  {%- if motor != lead_motor%}
-  public final Boolean invert{{ motor|upperfirst }}FollowerRequest = false;
-  {%- endif %}
-  {%- endfor %}
-
-  public final InvertedValue kClawMotorInverted = InvertedValue.Clockwise_Positive;
 
   public final Current supplyCurrentLimit = Amps.of(40);
   public final Current statorCurrentLimit = Amps.of(40);
 
 {% if limit_sensing_method == "CANrange" %}
-  public final Distance proximityThreshold = Centimeters.of(8.0);
-  public final Distance proximityHysteresis = Centimeters.of(0.5);
-  public final Double minSignalStrengthForValidMeasurement = 2500.0;
+  public final Distance {{ limit_switch_name }}ProximityThreshold = Centimeters.of(8.0);
+  public final Distance {{ limit_switch_name }}ProximityHysteresis = Centimeters.of(0.5);
+  public final Double {{ limit_switch_name }}MinSignalStrengthForValidMeasurement = 2500.0;
 {%- endif %}
 
   public final Voltage {{ game_piece|lowerfirst }}IntakeVoltage = Volts.of(3.0);
@@ -70,23 +63,55 @@ public class {{ name }}Constants {
             new {{ name }}Constants.Sim(),
             Filesystem.getDeployDirectory()
                 .toPath()
-                .resolve("constants/ClawConstants.Sim.json")
+                .resolve("constants/{{ name }}Constants.Sim.json")
                 .toString(),
             new JSONSyncConfigBuilder().build());
-
-    /** How long the motor must remain powered to intake or outtake a game piece */
-    public final Double actionTimeSeconds = 1.0;
+    
+    /**
+     * Simulated motor speed per volt applied
+     * 
+     * <p> (e.g. 12V = 12 rotations per second at 1 rotation per second per volt)
+     */
+    public final Double rotationsPerSecondPerVolt = 5.0;
 
     /**
-     * How many rotations per second the motor will spin per volt applied. This isn't a unit because
-     * I couldn't fight the double-layered PerUnit mess to get it to do what I want.
+     * The signum the motor voltage must match for intakeTimeSeconds to intake.
      */
-    public final double rotationsPerSecondPerVolt = 1.0;
+    public final Double intakeSignum = 1.0;
 
-    /** When piecePos > coralDetectionPoint, the simulated sensor can sense it */
-    public final double coralDetectionPoint = 0.7;
+    /**
+     * How long the motor voltage signum must equal intakeSignum to intake
+     */
+    public final Double intakeTimeSeconds = 0.5;
 
-    /** When piecePos < algaeDetectionPoint, the simulated sensor can sense it */
-    public final Double algaeDetectionPoint = 0.7;
+    /**
+     * The signum the motor voltage must match for ejectTimeSeconds to eject.
+     *
+     * <p> Ejecting means sending the game piece backward through the mechanism.
+     */
+    public final Double ejectSignum = 1.0;
+
+    /**
+     * How long the motor voltage signum must equal ejectSignum to eject
+     */
+    public final Double ejectTimeSeconds = 0.8;
+
+    // TODO: Ensure that eject/outtaking logic matches real-life mechanism
+    /**
+     * The signum the motor voltage must match for outtakeTimeSeconds to outtake.
+     *
+     * <p> Outtaking is passing the piece through the mechanism forward.
+     */
+    public final Double outtakeSignum = 1.0;
+
+    /**
+     * How long the motor voltage signum must equal outtakeSignum to outtake
+     */
+    public final Double outtakeTimeSeconds = 1.0;
+{%- if limit_sensing_method == "CANrange" %}
+
+    public final Distance distanceWith{{ game_piece|upperfirst }} = Centimeters.of(1.0);
+    public final Distance distanceWithoutObject = Centimeters.of(50.0);
+{%- endif%}
   }
 }

@@ -173,20 +173,40 @@ def goal_dimension(kind: str) -> str:
     if kind == "Flywheel":
         return "AngularVelocity"
 
-    print_err(f"Invalid kind {kind} passed to goal_dimension.")
+    msg = f"Invalid kind {kind} passed to goal_dimension."  # ruff EM102, see https://docs.astral.sh/ruff/rules/f-string-in-exception/
+    print_err(msg)
     print(
         "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
     )
-    msg = f"Invalid kind {kind} passed to goal_dimension"  # ruff EM102, see https://docs.astral.sh/ruff/rules/f-string-in-exception/
     raise ValueError(msg)
 
 
 def candi_signal(limit_sensing_method: str) -> str:
     """
-    Given a limit_sensing_method (CANdiS1 or CANdiS2) return S1 or S2
+    Given a CANdi limit_sensing_method (CANdiS1 or CANdiS2) return S1 or S2
     """
 
     return limit_sensing_method[-2:]
+
+
+def limit_switch_kind(limit_sensing_method: str) -> str:
+    """
+    Given a limit_sensing_method (CANdiS1, CANdiS2, or CANrange), return the
+    name of the type of limit switch (CANdi or CANrange)
+    """
+
+    if limit_sensing_method in ("CANdiS1", "CANdiS2"):
+        return "CANdi"
+
+    if limit_sensing_method == "CANrange":
+        return "CANrange"
+
+    msg = f"Invalid limit_sensing_method {limit_sensing_method} passed to limit_switch_kind."
+    print_err(msg)
+    print(
+        "This is a robotvibecoder issue, NOT a user error. Please report this on github!"
+    )
+    raise ValueError(msg)
 
 
 def generate_env() -> Environment:
@@ -210,5 +230,6 @@ def generate_env() -> Environment:
     env.filters["vel_unit"] = vel_unit
     env.filters["goal"] = goal
     env.filters["goal_dimension"] = goal_dimension
+    env.filters["limit_switch_kind"] = limit_switch_kind
 
     return env

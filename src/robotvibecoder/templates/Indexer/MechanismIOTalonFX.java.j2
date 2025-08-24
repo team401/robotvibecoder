@@ -1,10 +1,12 @@
-package frc.robot.subsystems.scoring;
+package frc.robot.{{ package }};
 
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -13,11 +15,12 @@ import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.constants.JsonConstants;
 
-public class ClawIOTalonFX implements ClawIO {
+public class {{ name }}IOTalonFX implements {{ name }}IO {
 {%- if limit_sensing_method != "Current" %}
   {{ limit_sensing_method }} {{ limit_switch_name}} = new {{ limit_sensing_method }}({{ name }}Constants.synced.getObject().{{ limit_switch_name }}ID, "{{ canbus }}");
 
@@ -43,7 +46,7 @@ public class ClawIOTalonFX implements ClawIO {
   private StatusSignal<Current> {{ motor }}StatorCurrent;
 
   {% endfor %}
-  public ClawIOTalonFX() {
+  public {{ name }}IOTalonFX() {
     TalonFXConfiguration talonFXConfigs =
         new TalonFXConfiguration()
             .withMotorOutput(
@@ -101,26 +104,31 @@ public class ClawIOTalonFX implements ClawIO {
         {{ motor }}StatorCurrent,
         {%- endfor %}
         {%- if limit_sensing_method == "CANrange" %}
-        {{ limit_switch_name }}Detected,
+        {{ limit_switch_name }}Detected
         {%- endif %}
         {%- if limit_sensing_method == "CANdiS1" or limit_sensing_method == "CANdiS2" %}
-        {{ limit_switch_name }}Closed,
+        {{ limit_switch_name }}Closed
         {%- endif %}
     );
   }
 
-  public void updateInputs(ClawInputs inputs) {
-    inputs.{{ game_piece|lowerfirst }}Detected = isAlgaeDetected();
+  public void updateInputs({{ name }}Inputs inputs) {
+    BaseStatusSignal.refreshAll(
+        {%- for motor in motors%}
+        {{ motor }}SupplyCurrent,
+        {{ motor }}StatorCurrent,
+        {%- endfor %}
+        {%- if limit_sensing_method == "CANrange" %}
+        {{ limit_switch_name }}Detected
+        {%- endif %}
+        {%- if limit_sensing_method == "CANdiS1" or limit_sensing_method == "CANdiS2" %}
+        {{ limit_switch_name }}Closed
+        {%- endif %}
+    );
+{%- if limit_sensing_method != "Current" %}
+    inputs.{{ game_piece|lowerfirst }}Detected = {{ limit_switch_name }}Detected.getValue();
 
-    inputs.algaeSignalStrength = algaeRange.getSignalStrength().getValueAsDouble();
-    inputs.algaeDistance.mut_replace(algaeRange.getDistance().getValue());
-
-    inputs.algaeRangeConnected =
-        algaeRange.isConnected()
-            && StatusSignal.isAllGood(
-                algaeRange.getIsDetected(),
-                algaeRange.getSignalStrength(),
-                algaeRange.getDistance());
+{%- endif%}
 
     inputs.coralSignalStrength = coralRange.getSignalStrength().getValueAsDouble();
     inputs.coralDistance.mut_replace(coralRange.getDistance().getValue());
@@ -132,10 +140,10 @@ public class ClawIOTalonFX implements ClawIO {
                 coralRange.getSignalStrength(),
                 coralRange.getDistance());
 
-    inputs.clawMotorPos.mut_replace({{ lead_motor }}.getPosition().getValue());
+    inputs.{{ lead_motor }}Pos.mut_replace({{ lead_motor }}.getPosition().getValue());
 
-    inputs.clawStatorCurrent.mut_replace({{ lead_motor }}.getStatorCurrent().getValue());
-    inputs.clawSupplyCurrent.mut_replace({{ lead_motor }}.getSupplyCurrent().getValue());
+    inputs.{{ lead_motor }}StatorCurrent.mut_replace({{ lead_motor }}.getStatorCurrent().getValue());
+    inputs.{{ lead_motor }}SupplyCurrent.mut_replace({{ lead_motor }}.getSupplyCurrent().getValue());
   }
 
   public void applyOutputs(ClawOutputs outputs) {
@@ -155,13 +163,6 @@ public class ClawIOTalonFX implements ClawIO {
     return {{ lead_motor }}.getPosition().getValue();
   }
 
-  public boolean isCoralDetected() {
-    return coralRange.getIsDetected().getValue();
-  }
-
-  public boolean isAlgaeDetected() {
-    return algaeRange.getIsDetected().getValue();
-  }
   {%- if limit_sensing_method != "Current" %}
 
   public void setObeyLimitSwitch(boolean obeyLimitSwitch) {

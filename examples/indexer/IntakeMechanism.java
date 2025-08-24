@@ -20,7 +20,7 @@ public class IntakeMechanism {
   private LoggedTunableNumber manualTuningVolts;
 
   public IntakeMechanism(IntakeIO io) {
-    manualTuningVolts = new LoggedTunableNumber("IntakeTunables/clawManualVolts", 0.0);
+    manualTuningVolts = new LoggedTunableNumber("IntakeTunables/intakeManualVolts", 0.0);
 
     this.io = io;
   }

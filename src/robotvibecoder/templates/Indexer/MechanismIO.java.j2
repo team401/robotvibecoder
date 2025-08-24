@@ -1,4 +1,4 @@
-package frc.robot.subsystems.scoring;
+package frc.robot.{{ package }};
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Meters;
@@ -16,13 +16,12 @@ import org.littletonrobotics.junction.AutoLog;
 public interface {{ name }}IO {
   @AutoLog
   public static class {{ name }}Inputs {
+{%- if limit_sensing_method !+ "Current" %}
     /**
-     * Whether or not the sensor detects a coral
-     *
-     * <p>This is left intentionally vague until we decide on CANrange vs. beam break vs. something
-     * else
+     * Whether or not the {{ limit_switch_name }} detects a {{ game_piece }}
      */
     public boolean {{ game_piece|lowerfirst }}Detected = false;
+{%- endif %}
 {%- if limit_sensing_method == "CANrange" %}
 
     public double {{ game_piece|lowerfirst }}SignalStrength = 0.0;
@@ -44,8 +43,25 @@ public interface {{ name }}IO {
 
   @AutoLog
   public static class {{ name }}Outputs {
-    /** The voltage applied to the {{ lead_motor }} */
+    /**
+     *The voltage applied to the {{ lead_motor }}
+     {%- if limit_sensing_method != "Current" %}
+     *
+     * <p> This requested voltage may be different from the actual voltage
+     applied if hardware limit switches are used.
+     {%- endif %}
+     */
     public MutVoltage {{ lead_motor }}AppliedVolts = Volts.mutable(0.0);
+    {%- if limit_sensing_method != "Current" %}
+
+    /**
+     * The motor voltage as reported by the TalonFX
+     *
+     * <p> This output voltage may be different from the requested voltage
+     applied if hardware limit switches are used.
+     */
+    public MutVoltage {{ lead_motor }}MotorVolts = Volts.mutable(0.0);
+    {%- endif %}
   }
 
   /**

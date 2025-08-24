@@ -9,7 +9,6 @@ from typing import List, TextIO
 import pick
 
 
-@dataclass
 class Colors:
     """
     ANSI Escape Codes for text colors and effects

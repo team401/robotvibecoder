@@ -63,8 +63,12 @@ def generate(args: Namespace) -> None:
         f"{template_folder}/MechanismIO.java.j2": "{name}IO.java",
         f"{template_folder}/MechanismIOTalonFX.java.j2": "{name}IOTalonFX.java",
         f"{template_folder}/MechanismConstants.java.j2": "{name}Constants.java",
-        f"{template_folder}/" + config.kind + "Sim.java.j2": "{name}IOSim.java",
     }
+
+    if config.kind in (MechanismKind.ARM, MechanismKind.ELEVATOR):
+        template_to_output_map[f"{template_folder}/" + config.kind + "Sim.java.j2"] = (
+            "{name}IOSim.java"
+        )
 
     if not args.stdin:
         print_warning(

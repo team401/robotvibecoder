@@ -40,8 +40,21 @@ public interface IntakeIO {
 
   @AutoLog
   public static class IntakeOutputs {
-    /** The voltage applied to the intakeMotor */
+    /**
+     *The voltage applied to the intakeMotor
+     *
+     * <p> This requested voltage may be different from the actual voltage
+     applied if hardware limit switches are used.
+     */
     public MutVoltage intakeMotorAppliedVolts = Volts.mutable(0.0);
+
+    /**
+     * The motor voltage as reported by the TalonFX
+     *
+     * <p> This output voltage may be different from the requested voltage
+     applied if hardware limit switches are used.
+     */
+    public MutVoltage intakeMotorMotorVolts = Volts.mutable(0.0);
   }
 
   /**

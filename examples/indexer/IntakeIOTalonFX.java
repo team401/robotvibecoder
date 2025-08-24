@@ -62,7 +62,7 @@ public class ClawIOTalonFX implements ClawIO {
     BaseStatusSignal.setUpdateFrequencyForAll(50.0,
         intakeMotorSupplyCurrent,
         intakeMotorStatorCurrent,
-        coralRangeDetected,
+        coralRangeDetected
     );
   }
 
