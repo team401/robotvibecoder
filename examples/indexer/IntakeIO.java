@@ -17,17 +17,14 @@ public interface IntakeIO {
   @AutoLog
   public static class IntakeInputs {
     /**
-     * Whether or not the sensor detects a coral
-     *
-     * <p>This is left intentionally vague until we decide on CANrange vs. beam break vs. something
-     * else
+     * Whether or not the coralCANRange detects a Coral
      */
     public boolean coralDetected = false;
 
     public double coralSignalStrength = 0.0;
     public MutDistance coralDistance = Meters.mutable(0.0);
 
-    public boolean coralRangeConnected = false;
+    public boolean coralCANRangeConnected = false;
 
     public MutAngle intakeMotorPos = Rotations.mutable(0.0);
 

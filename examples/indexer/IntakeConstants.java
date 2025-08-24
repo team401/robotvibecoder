@@ -1,4 +1,4 @@
-package frc.robot.constants;
+package frc.robot.subsystems.scoring;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Centimeters;
@@ -27,20 +27,19 @@ public class IntakeConstants {
           EnvironmentHandler.getEnvironmentHandler().getEnvironmentPathProvider(),
           new JSONSyncConfigBuilder().build());
 
-  public final Integer coralRangeID = 1;
+  public final Integer coralCANRangeID = 1;
 
   
-  public final Integer intakeMotorId = 2; // TODO: Replace placeholder CAN ID
-
-  public final InvertedValue kClawMotorInverted = InvertedValue.Clockwise_Positive;
+  public final Integer intakeMotorID = 2; // TODO: Replace placeholder CAN ID
+  public final InvertedValue kIntakeMotorInverted = InvertedValue.Clockwise_Positive;
 
   public final Current supplyCurrentLimit = Amps.of(40);
   public final Current statorCurrentLimit = Amps.of(40);
 
 
-  public final Distance proximityThreshold = Centimeters.of(8.0);
-  public final Distance proximityHysteresis = Centimeters.of(0.5);
-  public final Double minSignalStrengthForValidMeasurement = 2500.0;
+  public final Distance coralCANRangeProximityThreshold = Centimeters.of(8.0);
+  public final Distance coralCANRangeProximityHysteresis = Centimeters.of(0.5);
+  public final Double coralCANRangeMinSignalStrengthForValidMeasurement = 2500.0;
 
   public final Voltage coralIntakeVoltage = Volts.of(3.0);
   public final Voltage coralVoltage = Volts.of(3.0);
