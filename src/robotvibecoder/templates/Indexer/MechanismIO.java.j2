@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.AutoLog;
 public interface {{ name }}IO {
   @AutoLog
   public static class {{ name }}Inputs {
-{%- if limit_sensing_method !+ "Current" %}
+{%- if limit_sensing_method != "Current" %}
     /**
      * Whether or not the {{ limit_switch_name }} detects a {{ game_piece }}
      */

@@ -6,17 +6,23 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.lang.Runnable;
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.MutAngle;
 import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.constants.JsonConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class {{ name }}IOSim implements {{ name }}IO {
-  private enum Action = {
+import com.ctre.phoenix6.sim.CANrangeSimState;
+
+public class {{ name }}IOSim extends {{ name }}IOTalonFX {
+  private enum Action {
     None,
     Intaking,
     Ejecting,
@@ -26,11 +32,11 @@ public class {{ name }}IOSim implements {{ name }}IO {
   boolean has{{ game_piece|upperfirst }} = true; // TODO: Change this value to correctly reflect preloa
 
   // Supplier to manage where the robot can intake in sim
-  private static BooleanSupplier {{ game_piece|upperfirst }}AvailableSupplier = () -> false;
+  private static BooleanSupplier {{ game_piece|lowerfirst }}AvailableSupplier = () -> false;
   // Callback for when a piece is ejected
-  private static Callable onEject = () -> {};
+  private static Runnable onEject = () -> {};
   // Callback for when a piece is outtaked
-  private static Callable onOuttake = () -> {};
+  private static Runnable onOuttake = () -> {};
 
   private MutVoltage outputVoltage = Volts.mutable(0.0);
 
@@ -43,8 +49,8 @@ public class {{ name }}IOSim implements {{ name }}IO {
   private Action currentAction = Action.None;
 {%- if limit_sensing_method != "Current" %}
 
-  private {{ limit_sensing_method|limit_switch_kind }}SimState = {{ limit_switch_name }}.getSimState();
-{%- %}
+  private {{ limit_sensing_method|limit_switch_kind }}SimState {{ limit_switch_name }}SimState = {{ limit_switch_name }}.getSimState();
+{%- endif %}
 
   public {{ name }}IOSim() {
     updateSimState();
@@ -60,18 +66,18 @@ public class {{ name }}IOSim implements {{ name }}IO {
   /**
    * Update the on-eject callback.
    *
-   * <p> This Callable will be called whenever the {{ name }} ejects/backs out a {{ game_piece }}
+   * <p> This Runnable will be called whenever the {{ name }} ejects/backs out a {{ game_piece }}
    */
-  public static void setOnEject(Callable newOnEject) {
+  public static void setOnEject(Runnable newOnEject) {
     onEject = newOnEject;
   }
 
   /**
    * Update the on-outtake callback.
    *
-   * <p> This Callable will be called whenever the {{ name }} outtakes/passes forward a {{ game_piece }}
+   * <p> This Runnable will be called whenever the {{ name }} outtakes/passes forward a {{ game_piece }}
    */
-  public static void setOnOuttake(Callable newOnOuttake) {
+  public static void setOnOuttake(Runnable newOnOuttake) {
     onOuttake = newOnOuttake;
   }
 
@@ -80,7 +86,7 @@ public class {{ name }}IOSim implements {{ name }}IO {
       outputVoltage.mut_replace(Volts.zero());
     }
 
-    boolean {{ game_piece|lowerfirst }}Available = {{ game_piece|lowerfirst }}AvailableSupplier.get();
+    boolean {{ game_piece|lowerfirst }}Available = {{ game_piece|lowerfirst }}AvailableSupplier.getAsBoolean();
 
     // v Volts * k Rotations/Second*Volt * s Seconds =  Rotations
     motorPos.mut_plus(
@@ -134,7 +140,7 @@ public class {{ name }}IOSim implements {{ name }}IO {
     {{ limit_switch_name }}SimState.setDistance(
       has{{ game_piece|upperfirst }}
         ? {{ name }}Constants.Sim.synced.getObject().distanceWith{{ game_piece|upperfirst }}
-        : {{ name }}Constants.Sim.Synced.getObject().distanceWithoutObject);
+        : {{ name }}Constants.Sim.synced.getObject().distanceWithoutObject);
 {%- endif %}
 {%- if limit_sensing_method == "CANdiS1" or limit_sensing_method == "CANdiS2" %}
 {%- set signal = limit_sensing_method|candi_signal %}
@@ -154,37 +160,24 @@ public class {{ name }}IOSim implements {{ name }}IO {
   public void updateInputs({{ name }}Inputs inputs) {
     updateSimState();
 
-    inputs.algaeDetected = algaeSensed;
-    inputs.coralDetected = coralSensed;
+    inputs.{{ game_piece|lowerfirst }}Detected = has{{ game_piece }};
 
     Current motorCurrent =
-        (hasAlgae || hasCoral || algaeAvailable || coralAvailable)
+        (has{{ game_piece }} || {{ game_piece|lowerfirst }}AvailableSupplier.getAsBoolean())
                 && (outputVoltage.in(Volts) != 0.0)
             ? currentPushing
             : Amps.zero();
 
     inputs.{{ lead_motor }}Pos.mut_replace(motorPos);
-    inputs.clawStatorCurrent.mut_replace(motorCurrent);
-    inputs.clawSupplyCurrent.mut_replace(motorCurrent);
+    inputs.{{ lead_motor }}StatorCurrent.mut_replace(motorCurrent);
+    inputs.{{ lead_motor }}SupplyCurrent.mut_replace(motorCurrent);
   }
 
   public void applyOutputs({{ name }}Outputs outputs) {
-    outputs.clawAppliedVolts.mut_replace(outputVoltage);
+    outputs.{{ lead_motor }}AppliedVolts.mut_replace(outputVoltage);
   }
 
   public void setVoltage(Voltage volts) {
     outputVoltage.mut_replace(volts);
-  }
-
-  public Angle get{{ name }}MotorPos() {
-    return motorPos;
-  }
-
-  public boolean isCoralDetected() {
-    return coralSensed;
-  }
-
-  public boolean isAlgaeDetected() {
-    return algaeSensed;
   }
 }

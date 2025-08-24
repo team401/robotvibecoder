@@ -69,6 +69,10 @@ def generate(args: Namespace) -> None:
         template_to_output_map[f"{template_folder}/" + config.kind + "Sim.java.j2"] = (
             "{name}IOSim.java"
         )
+    elif config.kind == MechanismKind.INDEXER:
+        template_to_output_map[f"{template_folder}/MechanismIOSim.java.j2"] = (
+            "{name}IOSim.java"
+        )
 
     if not args.stdin:
         print_warning(
